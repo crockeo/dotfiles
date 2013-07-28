@@ -19,9 +19,9 @@ set so=4
 set nowrap
 
 " Changing tab-width to 4
-set tabstop=4
-set shiftwidth=4
-set noexpandtab
+set tabstop=2
+set shiftwidth=2
+set expandtab
 
 " Stopping vim from making those damn backups
 set nobackup
@@ -29,6 +29,15 @@ set nobackup
 " Changing colorscheme to molokai
 set t_Co=256
 colorscheme molokai
+
+" Telling Vim to confirm instead of fail commands
+set confirm
+
+" Disabling modelines
+set nomodeline
+
+" Backspacing over line breaks and the such
+set backspace=indent,eol,start
 
 " Adding save/reload hotkeys
 map r :so $MYVIMRC<Enter>
