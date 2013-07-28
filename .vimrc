@@ -23,8 +23,9 @@ set tabstop=2
 set shiftwidth=2
 set expandtab
 
-" Stopping vim from making those damn backups
+" Stopping vim from making backups and swaps
 set nobackup
+set noswapfile
 
 " Changing colorscheme to molokai
 set t_Co=256
