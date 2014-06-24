@@ -19,9 +19,9 @@ set so=4
 set nowrap
 
 " Changing tab-width to 4
-set tabstop=2
-set shiftwidth=2
-set expandtab
+set tabstop=4
+set shiftwidth=4
+set smarttab
 
 " Stopping vim from making backups and swaps
 set nobackup
@@ -43,6 +43,8 @@ set backspace=indent,eol,start
 " Adding save/reload hotkeys
 map r :so $MYVIMRC<Enter>
 map s :w<Enter>
+map < :tabp<Enter>
+map > :tabn<Enter>
 
 " GVim Specific Settings
 if has("gui_running")
