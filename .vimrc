@@ -9,6 +9,9 @@ filetype plugin on
 filetype indent on
 filetype on
 
+" If filetype isn't work, use default autoindent
+set autoindent
+
 " Adding line numbers
 set number
 
@@ -18,9 +21,9 @@ set so=4
 " Disabling word wrapping
 set nowrap
 
-" Changing tab-width to 4
-set tabstop=4
-set shiftwidth=4
+" Changing tab-width to 2
+set tabstop=2
+set shiftwidth=2
 set smarttab
 
 " Stopping vim from making backups and swaps
@@ -48,6 +51,6 @@ map > :tabn<Enter>
 
 " GVim Specific Settings
 if has("gui_running")
-    set guioptions-=T
-    set guioptions-=r
+  set guioptions-=T
+  set guioptions-=r
 endif
