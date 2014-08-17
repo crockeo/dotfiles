@@ -44,10 +44,12 @@ set nomodeline
 set backspace=indent,eol,start
 
 " Adding save/reload hotkeys
-map r :so $MYVIMRC<Enter>
-map s :w<Enter>
 map < :tabp<Enter>
 map > :tabn<Enter>
+map <C-w> :w<Enter>
+map <C-e> :q<Enter>
+map <C-r> :wq<Enter>
+map <C-t> :so $MYVIMRC<Enter>
 
 " GVim Specific Settings
 if has("gui_running")
