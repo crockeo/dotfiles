@@ -43,13 +43,22 @@ set nomodeline
 " Backspacing over line breaks and the such
 set backspace=indent,eol,start
 
-" Adding save/reload hotkeys
+" Moving around new buffers
+map <C-c> :vsp<Enter>
+map <C-Up> <C-w><Up>
+map <C-Down> <C-w><Down>
+map <C-Left> <C-w><Left>
+map <C-Right> <C-w><Right>
+
+" Moving around tabs
 map < :tabp<Enter>
 map > :tabn<Enter>
-map <C-w> :w<Enter>
-map <C-e> :q<Enter>
-map <C-r> :wq<Enter>
-map <C-t> :so $MYVIMRC<Enter>
+
+" Reloading vmi
+map <C-z> :so $MYVIMRC<Enter>
+
+" Quitting a buffer
+map <C-x> :q<Enter>
 
 " GVim Specific Settings
 if has("gui_running")
