@@ -54,8 +54,8 @@ map <C-Right> <C-w><Right>
 map < :tabp<Enter>
 map > :tabn<Enter>
 
-" Reloading vmi
-map <C-z> :so $MYVIMRC<Enter>
+" Saving a file
+map <C-z> :w<Enter>
 
 " Quitting a buffer
 map <C-x> :q<Enter>
