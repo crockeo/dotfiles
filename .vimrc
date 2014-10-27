@@ -36,9 +36,6 @@ set noswapfile
 set t_Co=256
 colorscheme molokai
 
-" Setting pathogen to work
-execute pathogen#infect()
-
 " Setting the <Leader> to ' '
 let mapleader=" "
 
@@ -66,7 +63,9 @@ map <C-z> :w<Enter>
 map <C-x> :q<Enter>
 
 " Opening a new tab and opening NERDTree
-map <C-n> :tabe<Enter>
+map <C-n> :NERDTreeToggle<CR>
+
+autocmd vimenter * NERDTree
 
 " GVim Specific Settings
 if has("gui_running")
@@ -80,3 +79,6 @@ au BufRead,BufNewFile *.jade set filetype=jade
 
 " A line at column 81 yo keep one from writing more than terminal width.
 set colorcolumn=81
+
+" Setting pathogen to work
+execute pathogen#infect('~/.vim/bundle/{}')
