@@ -77,3 +77,6 @@ endif
 " Filetype associations
 au BufRead,BufNewFile *.tpp set filetype=cpp
 au BufRead,BufNewFile *.jade set filetype=jade
+
+" A line at column 81 yo keep one from writing more than terminal width.
+set colorcolumn=81
