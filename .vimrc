@@ -46,26 +46,20 @@ set nomodeline
 set backspace=indent,eol,start
 
 " Moving around new buffers
-map <C-c> :vsp<Enter>
 map <C-Up> <C-w><Up>
 map <C-Down> <C-w><Down>
 map <C-Left> <C-w><Left>
 map <C-Right> <C-w><Right>
 
 " Moving around tabs
-map <Leader><Left> :tabp<Enter>
-map <Leader><Right> :tabn<Enter>
+map <Leader><Left> :tabp<CR>
+map <Leader><Right> :tabn<CR>
 
-" Saving a file
-map <C-z> :w<Enter>
+" Switching to the last-used buffer.
+map ; :b#<CR>
 
-" Quitting a buffer
-map <C-x> :q<Enter>
-
-" Opening a new tab and opening NERDTree
+" Toggling NERDTree in the current tab.
 map <C-n> :NERDTreeToggle<CR>
-
-autocmd vimenter * NERDTree
 
 " GVim Specific Settings
 if has("gui_running")
@@ -73,11 +67,7 @@ if has("gui_running")
   set guioptions-=r
 endif
 
-" Filetype associations
-au BufRead,BufNewFile *.tpp set filetype=cpp
-au BufRead,BufNewFile *.jade set filetype=jade
-
-" A line at column 81 yo keep one from writing more than terminal width.
+" A line at column 81 to keep one from writing more than terminal width.
 set colorcolumn=81
 
 " Setting pathogen to work
