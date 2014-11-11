@@ -62,7 +62,7 @@ map ' :tabe<CR>
 map " :q<CR>
 
 " Toggling NERDTree in the current tab.
-map <C-n> :NERDTreeToggle<CR>
+map <C-n> :NERDTreeTabsToggle<CR>
 
 " GVim Specific Settings
 if has("gui_running")
