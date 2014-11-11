@@ -58,6 +58,9 @@ map <Leader><Right> :tabn<CR>
 " Switching to the last-used buffer.
 map ; :b#<CR>
 
+map ' :tabe<CR>
+map " :q<CR>
+
 " Toggling NERDTree in the current tab.
 map <C-n> :NERDTreeToggle<CR>
 
