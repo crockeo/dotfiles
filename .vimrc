@@ -1,13 +1,35 @@
 " Setting no compatible
 set nocompatible
 
-" Setting syntax highlighting
-syntax enable
+" Making sure to turn the filetype detection off (per the Vundle docs'
+" request)
+filetype off
+
+" Setting up Vundle
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" Setting up plugins.
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'jistr/vim-nerdtree-tabs'
+Plugin 'tikhomirov/vim-glsl'
+Plugin 'fatih/vim-go'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'godlygeek/tabular'
+
+" Done with Vundle setup
+call vundle#end()
 
 " Setting filetype-specific stuffs
 filetype plugin on
 filetype indent on
 filetype on
+
+" Setting syntax highlighting
+syntax enable
 
 " If filetype isn't work, use default autoindent
 set autoindent
@@ -55,6 +77,12 @@ map <C-Right> <C-w><Right>
 map <Leader><Left> :tabp<CR>
 map <Leader><Right> :tabn<CR>
 
+" Maping another way to exit insert mode.
+imap <C-a> <ESC>
+
+" Reloading the .vimrc
+map <Leader><Leader> :source $MYVIMRC<CR>
+
 " Switching to the last-used buffer.
 map ; :b#<CR>
 
@@ -73,5 +101,5 @@ endif
 " A line at column 81 to keep one from writing more than terminal width.
 set colorcolumn=81
 
-" Setting pathogen to work
-execute pathogen#infect('~/.vim/bundle/{}')
+" Setting the original molokai theme.
+let g:molokai_original = 1
