@@ -68,10 +68,10 @@ set nomodeline
 set backspace=indent,eol,start
 
 " Moving around new buffers
-map <C-Up> <C-w><Up>
-map <C-Down> <C-w><Down>
-map <C-Left> <C-w><Left>
-map <C-Right> <C-w><Right>
+map <S-Up> <C-w><Up>
+map <S-Down> <C-w><Down>
+map <S-Left> <C-w><Left>
+map <S-Right> <C-w><Right>
 
 " Moving around tabs
 map <Leader><Left> :tabp<CR>
