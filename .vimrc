@@ -44,6 +44,7 @@ set so=100
 set nowrap
 
 " Chaning the tab width to 4.
+set expandtab
 set tabstop=4
 set shiftwidth=4
 
@@ -78,7 +79,7 @@ map <Leader><Left> :tabp<CR>
 map <Leader><Right> :tabn<CR>
 
 " Maping another way to exit insert mode.
-imap <C-a> <ESC>
+imap <C-f> <ESC>
 
 " Reloading the .vimrc
 map <Leader><Leader> :source $MYVIMRC<CR>
