@@ -19,6 +19,7 @@ Plugin 'tikhomirov/vim-glsl'
 Plugin 'fatih/vim-go'
 Plugin 'digitaltoad/vim-jade'
 Plugin 'godlygeek/tabular'
+Plugin 'wlangstroth/vim-racket'
 
 " Done with Vundle setup
 call vundle#end()
