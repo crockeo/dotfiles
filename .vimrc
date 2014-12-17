@@ -82,6 +82,10 @@ map <Leader><Right> :tabn<CR>
 " Maping another way to exit insert mode.
 imap <C-f> <ESC>
 
+" Moving to the back and front of a line, respectively.
+imap <C-a> <Home>
+imap <C-e> <End>
+
 " Reloading the .vimrc
 map <Leader><Leader> :source $MYVIMRC<CR>
 
