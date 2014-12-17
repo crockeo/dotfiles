@@ -83,6 +83,8 @@ map <Leader><Right> :tabn<CR>
 imap <C-f> <ESC>
 
 " Moving to the back and front of a line, respectively.
+map <C-a> <Home>
+map <C-e> <End>
 imap <C-a> <Home>
 imap <C-e> <End>
 
