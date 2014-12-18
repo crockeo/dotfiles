@@ -109,5 +109,8 @@ endif
 " A line at column 81 to keep one from writing more than terminal width.
 set colorcolumn=81
 
+" Disabling auto-commenting the next line.
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
 " Setting the original molokai theme.
 let g:molokai_original = 1
