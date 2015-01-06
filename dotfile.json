@@ -1,0 +1,19 @@
+{
+    "name": "editorconfig",
+
+    "moveFiles": [
+        {
+            "src": ".tmux.conf",
+            "dst": "~/.tmux.conf"
+        },
+
+        {
+            "src": ".zshrc",
+            "dst": "~/.zshrc"
+        }
+    ],
+    "runScripts": [],
+    "installPackages": [
+        { "url": "crockeo/vimconfig.git" }
+    ]
+}
