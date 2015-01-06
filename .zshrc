@@ -24,7 +24,7 @@ export PATH="$PATH:$HOME/usrbin"
 export PATH="$PATH:$GOPATH/bin"
 
 # Making the terminal run with 256 colors.
-export TERM=xterm-256color
+export TERM=screen-256color
 
 # Starting tmux
 if [ "$TMUX" = "" ]
