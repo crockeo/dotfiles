@@ -20,6 +20,7 @@ Plugin 'fatih/vim-go'
 Plugin 'digitaltoad/vim-jade'
 Plugin 'godlygeek/tabular'
 Plugin 'wlangstroth/vim-racket'
+Plugin 'zah/nimrod.vim'
 
 " Done with Vundle setup
 call vundle#end()
