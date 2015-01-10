@@ -29,5 +29,12 @@ export TERM=screen-256color
 # Starting tmux
 if [ "$TMUX" = "" ]
 then
-    tmux
+    _SNAME=foobar
+
+    tmux new-session -s $_SNAME -d
+    tmux split-window -t $_SNAME -h -d
+    tmux selectp -t 0
+    tmux resize-pane -R 30
+
+    tmux attach -t $_SNAME
 fi
