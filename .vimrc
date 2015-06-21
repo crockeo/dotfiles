@@ -41,7 +41,7 @@ set autoindent
 set number
 
 " Setting buffer around keys for scrolling
-set so=100
+set so=3
 
 " Disabling word wrapping
 set nowrap
@@ -49,7 +49,9 @@ set nowrap
 " Chaning the tab width to 4.
 set expandtab
 set tabstop=4
+set softtabstop=4
 set shiftwidth=4
+set shiftround
 
 " Setting smart tabs
 set smarttab
@@ -62,6 +64,9 @@ set noswapfile
 set t_Co=256
 colorscheme molokai
 
+" Making vim remove any whitespace before saving.
+autocmd BufWritePre * :%s/\s\+$//e
+
 " Setting the <Leader> to ' '
 let mapleader=" "
 
@@ -70,12 +75,6 @@ set nomodeline
 
 " Backspacing over line breaks and the such
 set backspace=indent,eol,start
-
-" Moving around new buffers
-map <S-Up> <C-w><Up>
-map <S-Down> <C-w><Down>
-map <S-Left> <C-w><Left>
-map <S-Right> <C-w><Right>
 
 " Moving around tabs
 map <Leader><Left> :tabp<CR>
@@ -90,12 +89,10 @@ map <C-e> <End>
 imap <C-a> <Home>
 imap <C-e> <End>
 
-" Reloading the .vimrc
-map <Leader><Leader> :source $MYVIMRC<CR>
-
 " Switching to the last-used buffer.
 map ; :b#<CR>
 
+" Opening and closing buffers.
 map ' :tabe<CR>
 map " :q<CR>
 
