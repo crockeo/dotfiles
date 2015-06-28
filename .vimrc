@@ -22,6 +22,7 @@ Plugin 'digitaltoad/vim-jade'
 Plugin 'godlygeek/tabular'
 Plugin 'wlangstroth/vim-racket'
 Plugin 'zah/nimrod.vim'
+Plugin 'airblade/vim-gitgutter'
 
 " Done with Vundle setup
 call vundle#end()
