@@ -23,6 +23,7 @@ Plugin 'godlygeek/tabular'
 Plugin 'wlangstroth/vim-racket'
 Plugin 'zah/nimrod.vim'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'kien/ctrlp.vim'
 
 " Done with Vundle setup
 call vundle#end()
