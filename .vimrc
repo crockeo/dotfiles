@@ -78,6 +78,9 @@ set nomodeline
 " Backspacing over line breaks and the such
 set backspace=indent,eol,start
 
+" Ignoring untracked Git files in w/ ctrlp
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
 " Moving around tabs
 map <Leader><Left> :tabp<CR>
 map <Leader><Right> :tabn<CR>
