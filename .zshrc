@@ -23,6 +23,8 @@ export PATH="$PATH:$HOME/usrbin"
 # Adding the Go language bin
 export PATH="$PATH:$GOPATH/bin"
 
+export PATH="$PATH:$HOME/Library/Haskell/bin"
+
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
 
