@@ -1,0 +1,120 @@
+" Setting no compatible
+set nocompatible
+
+" Making sure to turn the filetype detection off (per the Vundle docs'
+" request)
+filetype off
+
+" Setting up Vundle
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" Setting up plugins.
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'jistr/vim-nerdtree-tabs'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'tikhomirov/vim-glsl'
+Plugin 'fatih/vim-go'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'godlygeek/tabular'
+Plugin 'wlangstroth/vim-racket'
+Plugin 'zah/nimrod.vim'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'kien/ctrlp.vim'
+
+" Done with Vundle setup
+call vundle#end()
+
+" Setting filetype-specific stuffs
+filetype plugin on
+filetype indent on
+filetype on
+
+" Setting syntax highlighting
+syntax enable
+
+" If filetype isn't work, use default autoindent
+set autoindent
+
+" Adding line numbers
+set number
+
+" Setting buffer around keys for scrolling
+set so=3
+
+" Disabling word wrapping
+set nowrap
+
+" Chaning the tab width to 4.
+set expandtab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set shiftround
+
+" Setting smart tabs
+set smarttab
+
+" Stopping vim from making backups and swaps
+set nobackup
+set noswapfile
+
+" Changing colorscheme to molokai
+set t_Co=256
+colorscheme molokai
+
+" Making vim remove any whitespace before saving.
+autocmd BufWritePre * :%s/\s\+$//e
+
+" Setting the <Leader> to ' '
+let mapleader=" "
+
+" Disabling modelines
+set nomodeline
+
+" Backspacing over line breaks and the such
+set backspace=indent,eol,start
+
+" Ignoring untracked Git files in w/ ctrlp
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+" Moving around tabs
+map <Leader><Left> :tabp<CR>
+map <Leader><Right> :tabn<CR>
+
+" Maping another way to exit insert mode.
+imap <C-f> <ESC>
+
+" Moving to the back and front of a line, respectively.
+map <C-a> <Home>
+map <C-e> <End>
+imap <C-a> <Home>
+imap <C-e> <End>
+
+" Switching to the last-used buffer.
+map ; :b#<CR>
+
+" Opening and closing buffers.
+map ' :tabe<CR>
+map " :q<CR>
+
+" Toggling NERDTree in the current tab.
+map <C-n> :NERDTreeTabsToggle<CR>
+
+" GVim Specific Settings
+if has("gui_running")
+  set guioptions-=T
+  set guioptions-=r
+endif
+
+" A line at column 81 to keep one from writing more than terminal width.
+set colorcolumn=81
+
+" Disabling auto-commenting the next line.
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
+" Setting the original molokai theme.
+let g:molokai_original = 1

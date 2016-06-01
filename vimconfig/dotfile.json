@@ -1,0 +1,20 @@
+{
+    "name": "vimconfig",
+
+    "moveFiles": [
+        {
+            "src": ".vim",
+            "dst": "~/.vim"
+        },
+
+        {
+            "src": ".vimrc",
+            "dst": "~/.vimrc"
+        }
+    ],
+
+    "runScripts": [
+        { "src": "getvundle.sh" }
+    ],
+    "installPackages": []
+}
