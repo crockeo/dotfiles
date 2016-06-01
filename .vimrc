@@ -1,49 +1,73 @@
-" Setting no compatible
+" Disabling backwards compatibility.
 set nocompatible
 
-" Making sure to turn the filetype detection off (per the Vundle docs'
-" request)
-filetype off
+"""""""""""
+" Plugins "
 
-" Setting up Vundle
+"" Setting up Vundle.
+filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
 
-" Setting up plugins.
-Plugin 'gmarik/Vundle.vim'
-
-Plugin 'scrooloose/nerdtree'
+"" Loading plugins.
 Plugin 'scrooloose/nerdcommenter'
-Plugin 'jistr/vim-nerdtree-tabs'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'tikhomirov/vim-glsl'
-Plugin 'fatih/vim-go'
-Plugin 'digitaltoad/vim-jade'
 Plugin 'godlygeek/tabular'
-Plugin 'wlangstroth/vim-racket'
-Plugin 'zah/nimrod.vim'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'kien/ctrlp.vim'
+Plugin 'fatih/vim-go'
+Plugin 'tikhomirov/vim-glsl'
+Plugin 'tpope/vim-surround'
+Plugin 'junegunn/vim-easy-align'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'dag/vim2hs'
+Plugin 'derekwyatt/vim-scala'
+Plugin 'rust-lang/rust.vim'
 
-" Done with Vundle setup
+"" Loading color schemes.
+Plugin 'tomasr/molokai'
+
+"" Finishing up Vundle config.
 call vundle#end()
 
-" Setting filetype-specific stuffs
+"" Setting up ctrlp.vim
+
+" Binding the key.
+let g:ctrlp_map = '<C-p>'
+
+" Ignoring .gitignore files.
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+"" Setting up vim-easy-align
+
+" Binding the key.
+xmap ga <Plug>(EasyAlign)
+
+"" Setting up vim2hs
+
+let g:haskell_conceal_enumerations = 0
+let g:haskell_conceal = 0
+
+"""""""""""""""
+" Other Stuff "
+
+" Enabling filetype-based functionality.
 filetype plugin on
 filetype indent on
 filetype on
 
-" Setting syntax highlighting
-syntax enable
+" Enabling syntax highlighting.
+syntax on
 
-" If filetype isn't work, use default autoindent
-set autoindent
+" Removing the backup file and swap files.
+set nobackup
+set noswapfile
 
 " Adding line numbers
 set number
 
-" Setting buffer around keys for scrolling
-set so=3
+" Adding a buffer around the cursor when scrolling.
+set so=5
 
 " Disabling word wrapping
 set nowrap
@@ -53,33 +77,15 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set shiftround
 
-" Setting smart tabs
-set smarttab
+" A line at column 81 to keep one from writing more than terminal width.
+set colorcolumn=81
 
-" Stopping vim from making backups and swaps
-set nobackup
-set noswapfile
-
-" Changing colorscheme to molokai
-set t_Co=256
-colorscheme molokai
-
-" Making vim remove any whitespace before saving.
-autocmd BufWritePre * :%s/\s\+$//e
-
-" Setting the <Leader> to ' '
-let mapleader=" "
-
-" Disabling modelines
-set nomodeline
-
-" Backspacing over line breaks and the such
+" Allowing you to backspace in a close-to-sane way.
 set backspace=indent,eol,start
 
-" Ignoring untracked Git files in w/ ctrlp
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+" Mapping the leader to space.
+let mapleader=" "
 
 " Moving around tabs
 map <Leader><Left> :tabp<CR>
@@ -97,24 +103,18 @@ imap <C-e> <End>
 " Switching to the last-used buffer.
 map ; :b#<CR>
 
-" Opening and closing buffers.
-map ' :tabe<CR>
-map " :q<CR>
-
-" Toggling NERDTree in the current tab.
-map <C-n> :NERDTreeTabsToggle<CR>
-
-" GVim Specific Settings
-if has("gui_running")
-  set guioptions-=T
-  set guioptions-=r
-endif
-
-" A line at column 81 to keep one from writing more than terminal width.
-set colorcolumn=81
-
 " Disabling auto-commenting the next line.
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
-" Setting the original molokai theme.
+" Disabling folding of functions.
+set nofoldenable
+
+" Changing colorscheme to molokai if it exists. Otherwise using the slate color
+" scheme.
 let g:molokai_original = 1
+set t_Co=256
+try
+    colorscheme molokai
+catch /^Vim\%((\a\+)\)\=:E185/
+    colorscheme slate
+endtry

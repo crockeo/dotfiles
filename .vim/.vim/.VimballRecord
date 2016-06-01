@@ -1,1 +1,0 @@
-haskell-vimball.vba: call delete('/home/crockeo/.vim/compiler/ghc.vim')|call delete('/home/crockeo/.vim/ftplugin/haskell.vim')|call delete('/home/crockeo/.vim/ftplugin/haskell_doc.vim')|call delete('/home/crockeo/.vim/ftplugin/haskell_hpaste.vim')|call delete('/home/crockeo/.vim/autoload/haskellmode.vim')|call delete('/home/crockeo/.vim/doc/haskellmode.txt')

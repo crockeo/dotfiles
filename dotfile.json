@@ -1,7 +1,12 @@
 {
-    "name": "editorconfig",
+    "name": "dotfiles",
 
     "moveFiles": [
+        {
+            "src": ".vimrc",
+            "dst": "~/.vimrc"
+        },
+
         {
             "src": ".tmux.conf",
             "dst": "~/.tmux.conf"
@@ -12,8 +17,10 @@
             "dst": "~/.zshrc"
         }
     ],
-    "runScripts": [],
-    "installPackages": [
-        { "url": "crockeo/vimconfig.git" }
-    ]
+
+    "runScripts": [
+        { "src": "getvundle.sh" }
+    ],
+
+    "installPackages": []
 }
