@@ -8,6 +8,11 @@
         },
 
         {
+            "src": ".vim/",
+            "dst": "~/.vim/"
+        },
+
+        {
             "src": ".tmux.conf",
             "dst": "~/.tmux.conf"
         },
