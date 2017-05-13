@@ -16,13 +16,13 @@ Plugin 'godlygeek/tabular'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'kien/ctrlp.vim'
 Plugin 'fatih/vim-go'
-Plugin 'tikhomirov/vim-glsl'
 Plugin 'tpope/vim-surround'
 Plugin 'junegunn/vim-easy-align'
-Plugin 'digitaltoad/vim-jade'
 Plugin 'dag/vim2hs'
 Plugin 'derekwyatt/vim-scala'
 Plugin 'rust-lang/rust.vim'
+Plugin 'scrooloose/syntastic'
+Plugin 'LnL7/vim-nix'
 
 "" Loading color schemes.
 Plugin 'tomasr/molokai'
@@ -47,6 +47,9 @@ xmap ga <Plug>(EasyAlign)
 
 let g:haskell_conceal_enumerations = 0
 let g:haskell_conceal = 0
+
+" Setting up syntastic
+let b:syntastic_mode = "passive"
 
 """""""""""""""
 " Other Stuff "
