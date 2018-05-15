@@ -20,6 +20,10 @@ export PATH="$PATH:$HOME/bin"
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
 
+# Aliasing old vims to new vims
+alias vi="nvim"
+alias vim="nvim"
+
 # Starting tmux
 if [ "$TMUX" = "" ]
 then
