@@ -1,58 +1,20 @@
 " Disabling backwards compatibility.
 set nocompatible
 
-"""""""""""
-" Plugins "
+" Setting up Plug.
+call plug#begin('~/.nvim/plugged')
 
-"" Setting up Vundle.
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'godlygeek/tabular'
+Plug 'airblade/vim-gitgutter'
+Plug 'kien/ctrlp.vim'
+Plug 'rust-lang/rust.vim'
+Plug 'tomasr/molokai'
 
-"" Loading plugins.
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'godlygeek/tabular'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'kien/ctrlp.vim'
-Plugin 'fatih/vim-go'
-Plugin 'tpope/vim-surround'
-Plugin 'junegunn/vim-easy-align'
-Plugin 'dag/vim2hs'
-Plugin 'derekwyatt/vim-scala'
-Plugin 'rust-lang/rust.vim'
-Plugin 'scrooloose/syntastic'
-Plugin 'LnL7/vim-nix'
+call plug#end()
 
-"" Loading color schemes.
-Plugin 'tomasr/molokai'
-
-"" Finishing up Vundle config.
-call vundle#end()
-
-"" Setting up ctrlp.vim
-
-" Binding the key.
 let g:ctrlp_map = '<C-p>'
-
-" Ignoring .gitignore files.
 let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
-
-"" Setting up vim-easy-align
-
-" Binding the key.
-xmap ga <Plug>(EasyAlign)
-
-"" Setting up vim2hs
-
-let g:haskell_conceal_enumerations = 0
-let g:haskell_conceal = 0
-
-" Setting up syntastic
-let b:syntastic_mode = "passive"
-
-"""""""""""""""
-" Other Stuff "
 
 " Enabling filetype-based functionality.
 filetype plugin on

@@ -14,17 +14,8 @@ PS1="%~$ "
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
-# Adding the go path.
-export GOPATH="$HOME/Documents/Development/Go"
-
 # Adding my only local bin.
 export PATH="$PATH:$HOME/bin"
-
-# Adding the Go language bin
-export PATH="$PATH:$GOPATH/bin"
-
-# Adding the Haskell bin.
-export PATH="$PATH:$HOME/Library/Haskell/bin"
 
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
