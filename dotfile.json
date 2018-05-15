@@ -3,13 +3,8 @@
 
     "moveFiles": [
         {
-            "src": ".vimrc",
-            "dst": "~/.vimrc"
-        },
-
-        {
-            "src": ".vim/",
-            "dst": "~/.vim/"
+            "src": "init.vim",
+            "dst": "~/.config/nvim/init.vim"
         },
 
         {
@@ -24,7 +19,7 @@
     ],
 
     "runScripts": [
-        { "src": "getvundle.sh" }
+        { "src": "getplug.sh" }
     ],
 
     "installPackages": []

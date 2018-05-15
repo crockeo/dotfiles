@@ -2,7 +2,7 @@
 set nocompatible
 
 " Setting up Plug.
-call plug#begin('~/.nvim/plugged')
+call plug#begin('~/.local/share/nvim/plugged')
 
 Plug 'scrooloose/nerdcommenter'
 Plug 'godlygeek/tabular'
