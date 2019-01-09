@@ -24,6 +24,12 @@ export TERM=screen-256color
 alias vi="nvim"
 alias vim="nvim"
 
+# Setting the default editor to nvim
+export EDITOR=nvim
+
+# Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
+bindkey -e
+
 # Starting tmux
 if [ "$TMUX" = "" ]
 then
