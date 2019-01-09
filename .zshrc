@@ -27,6 +27,11 @@ alias vim="nvim"
 # Setting the default editor to nvim
 export EDITOR=nvim
 
+# Configuring NVM.
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
+[ -s "/usr/local/opt/nvm/etc/bash_completion" ] && . "/usr/local/opt/nvm/etc/bash_completion"
+
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
 
