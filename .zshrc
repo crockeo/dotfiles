@@ -15,7 +15,7 @@ export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
 # Adding my only local bin.
-export PATH="$PATH:$HOME/bin"
+export PATH="$HOME/bin:$PATH"
 
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
@@ -38,6 +38,9 @@ eval "$(pyenv init -)"
 # Configuring golang
 export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
+
+# Creating a path to clang-format version 7.
+export CLANG_FORMAT="/usr/local/opt/llvm@7/bin/clang-format"
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
