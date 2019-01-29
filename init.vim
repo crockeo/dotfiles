@@ -11,6 +11,7 @@ Plug 'kien/ctrlp.vim'
 Plug 'tomasr/molokai'
 Plug 'Rip-Rip/clang_complete'
 Plug 'rhysd/vim-clang-format'
+Plug 'fatih/vim-go'
 
 call plug#end()
 
