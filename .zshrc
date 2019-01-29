@@ -33,7 +33,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/etc/bash_completion" ] && . "/usr/local/opt/nvm/etc/bash_completion"
 
 # Configuring pyenv
-eval "$(pyenv init -)"
+if type "pyenv" > /dev/null; then
+  eval "$(pyenv init -)"
+fi
 
 # Configuring golang
 export GOPATH="$HOME/go"
