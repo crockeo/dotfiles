@@ -79,7 +79,7 @@ let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib'
 
 " Configuring clang_format for llvm@7 installed by Homebrew.
 let g:clang_format#command='/usr/local/opt/llvm@7/bin/clang-format'
-let g:clang_format#auto_format=1
+map <C-f> :ClangFormat<CR>
 
 " Changing colorscheme to molokai if it exists. Otherwise using the slate color
 " scheme.
