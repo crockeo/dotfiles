@@ -10,8 +10,14 @@ Plug 'airblade/vim-gitgutter'
 Plug 'kien/ctrlp.vim'
 Plug 'tomasr/molokai'
 Plug 'Rip-Rip/clang_complete'
-Plug 'rhysd/vim-clang-format'
 Plug 'fatih/vim-go'
+Plug 'rust-lang/rust.vim'
+
+" Code formatting tooling
+Plug 'google/vim-maktaba'
+Plug 'google/vim-codefmt'
+Plug 'google/vim-glaive'
+Plug 'syml/rust-codefmt'
 
 call plug#end()
 
@@ -79,7 +85,7 @@ let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib'
 
 " Configuring clang_format for llvm@7 installed by Homebrew.
 let g:clang_format#command='/usr/local/opt/llvm@7/bin/clang-format'
-map <C-f> :ClangFormat<CR>
+map <C-f> :FormatCode<CR>
 
 " Changing colorscheme to molokai if it exists. Otherwise using the slate color
 " scheme.
