@@ -18,6 +18,7 @@ Plug 'google/vim-maktaba'
 Plug 'google/vim-codefmt'
 Plug 'google/vim-glaive'
 Plug 'syml/rust-codefmt'
+Plug 'ambv/black'
 
 call plug#end()
 
@@ -85,7 +86,19 @@ let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib'
 
 " Configuring clang_format for llvm@7 installed by Homebrew.
 let g:clang_format#command='/usr/local/opt/llvm@7/bin/clang-format'
-map <C-f> :FormatCode<CR>
+
+" Configuring formatting based on buffer. Used to format Python with black, and everything else with
+" vim-codefmt.
+function! DynFormat()
+  let buf_ft = &filetype
+  if buf_ft ==# "python"
+    Black
+  else
+    FormatCode
+  endif
+endfunction
+
+map <C-f> :call DynFormat()<CR>
 
 " Changing colorscheme to molokai if it exists. Otherwise using the slate color
 " scheme.
