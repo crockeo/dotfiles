@@ -1,17 +1,19 @@
-" Disabling backwards compatibility.
 set nocompatible
 
-" Setting up Plug.
+"""""""""""""""""""""""
+" Plugin Installation "
 call plug#begin('~/.local/share/nvim/plugged')
 
+" General-use plugins
 Plug 'scrooloose/nerdcommenter'
 Plug 'godlygeek/tabular'
 Plug 'airblade/vim-gitgutter'
 Plug 'kien/ctrlp.vim'
 Plug 'tomasr/molokai'
-Plug 'Rip-Rip/clang_complete'
-Plug 'fatih/vim-go'
-Plug 'rust-lang/rust.vim'
+Plug 'roxma/nvim-yarp'
+Plug 'ncm2/ncm2'
+Plug 'ncm2/ncm2-bufword'
+Plug 'ncm2/ncm2-path'
 
 " Code formatting tooling
 Plug 'google/vim-maktaba'
@@ -20,75 +22,86 @@ Plug 'google/vim-glaive'
 Plug 'syml/rust-codefmt'
 Plug 'ambv/black'
 
+" C++ IDE Support
+Plug 'Rip-Rip/clang_complete'
+
+" Golang IDE Support
+Plug 'fatih/vim-go'
+Plug 'ncm2/ncm2-go'
+
+" Python IDE Support
+Plug 'ncm2/ncm2-jedi'
+
+" Rust IDE Support
+Plug 'rust-lang/rust.vim'
+
 call plug#end()
 
-let g:ctrlp_map = '<C-p>'
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
-
-" Enabling filetype-based functionality.
+""""""""""""""""""
+" General config "
 filetype plugin indent on
-
-" Enabling syntax highlighting.
 syntax on
-
-" Removing the backup file and swap files.
 set nobackup
 set noswapfile
-
-" Adding line numbers
 set number
-
-" Adding a buffer around the cursor when scrolling.
 set so=5
-
-" Disabling word wrapping
 set nowrap
-
-" Changing the tab width to 2.
 set expandtab
 set tabstop=2
 set softtabstop=2
 set shiftwidth=2
-
-" A line at column 81 to keep one from writing more than terminal width.
-set colorcolumn=101
-
-" Allowing you to backspace in a close-to-sane way.
+set colorcolumn=121
+set textwidth=120
 set backspace=indent,eol,start
-
-" Mapping the leader to space.
 let mapleader=" "
-
-" Moving around tabs
-map <Leader><Left> :tabp<CR>
-map <Leader><Right> :tabn<CR>
-
-" Maping another way to exit insert mode.
 imap <C-f> <ESC>
-
-" Moving to the back and front of a line, respectively.
 map <C-a> <Home>
 map <C-e> <End>
 imap <C-a> <Home>
 imap <C-e> <End>
-
-" Switching to the last-used buffer.
 map ; :b#<CR>
-
-" Disabling auto-commenting the next line.
+map <Leader><Left> :tabp<CR>
+map <Leader><Right> :tabn<CR>
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
-" Disabling folding of functions.
 set nofoldenable
 
-" Configuring clang_complete for default macOS install directory.
+""""""""""""""""""""""""
+" Plugin Configuration "
+
+" CtrlP Configuration
+let g:ctrlp_map = '<C-p>'
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+" Black Configuration
+let g:black_linelength=120
+let g:black_skip_string_normalization=1
+
+" General IDE Configuration
+autocmd BufEnter * call ncm2#enable_for_buffer()
+set completeopt=menuone,noselect,noinsert
+set shortmess+=c
+let ncm2#popup_delay = 5
+let ncm2#complete_length = [[1, 1]]
+let g:ncm2#matcher = 'substrfuzzy'
+
+" C++ IDE Configuration
 let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib'
-
-" Configuring clang_format for llvm@7 installed by Homebrew.
 let g:clang_format#command='/usr/local/opt/llvm@7/bin/clang-format'
+autocmd BufEnter *.go call ncm2#override_source('bufword', {'scope_blacklist': ["golang"]})
 
-" Configuring formatting based on buffer. Used to format Python with black, and everything else with
-" vim-codefmt.
+" Python IDE Configuration
+autocmd BufEnter *.py call ncm2#override_source('bufword', {'scope_blacklist': ["python"]})
+
+" Color Scheme Configuration
+let g:molokai_original = 1
+set t_Co=256
+try
+    colorscheme molokai
+catch /^Vim\%((\a\+)\)\=:E185/
+    colorscheme slate
+endtry
+
+" Formatting Configuration
 function! DynFormat()
   let buf_ft = &filetype
   if buf_ft ==# "python"
@@ -99,13 +112,3 @@ function! DynFormat()
 endfunction
 
 map <C-f> :call DynFormat()<CR>
-
-" Changing colorscheme to molokai if it exists. Otherwise using the slate color
-" scheme.
-let g:molokai_original = 1
-set t_Co=256
-try
-    colorscheme molokai
-catch /^Vim\%((\a\+)\)\=:E185/
-    colorscheme slate
-endtry
