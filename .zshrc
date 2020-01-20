@@ -52,3 +52,6 @@ export CLANG_FORMAT="/usr/local/opt/llvm@7/bin/clang-format"
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
+
+# Support for thefuck
+eval $(thefuck --alias)
