@@ -26,19 +26,9 @@ export PATH="$HOME/bin:$PATH"
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
 
-# Aliasing old vims to new vims
-alias vi="nvim"
-alias vim="nvim"
-
-# Setting the default editor to nvim
-export EDITOR=nvim
-
 # Configuring golang
 export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
-
-# Support for thefuck
-eval $(thefuck --alias)
