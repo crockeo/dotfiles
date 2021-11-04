@@ -1,3 +1,4 @@
+eval $(/opt/homebrew/bin/brew shellenv)
 # Starting tmux
 if [ "$TMUX" = "" ]
 then
