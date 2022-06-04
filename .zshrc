@@ -1,6 +1,7 @@
 eval $(/opt/homebrew/bin/brew shellenv)
+
 # Starting tmux
-if [ "$TMUX" = "" ]
+if [ "$EMACS" = "" ] && [ "$TMUX" = "" ]
 then
     tmux new-session -A -s foobar
 fi
