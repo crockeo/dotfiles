@@ -61,7 +61,7 @@ def iter_manifest() -> tuple[Path, Path, Path]:
             yield (dotfiles_dir / item, home / target_dir / item)
     
     
-def deploy() -> None:
+def deploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
         dst_item.parent.mkdir(exist_ok=True)
         if not src_item.exists():
@@ -75,11 +75,15 @@ def deploy() -> None:
             warning(f"Skipping {src_item.relative_to(Path.cwd())} -- already exists.")
             continue
 
+        if dry_run:
+            info(f"Would have linked {src_item} to {dst_item}.")
+            continue
+
         info(f"Linked {src_item} to {dst_item}.")
         dst_item.symlink_to(src_item)
     
     
-def undeploy() -> None:
+def undeploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
         if not dst_item:
             # We don't need to log here,
@@ -94,19 +98,37 @@ def undeploy() -> None:
             warning(f"Skipping {dst_item} -- doesn't refer to {src_item}.")
             continue
             
+        if dry_run:
+            info(f"Would have unlinked {src_item} from {dst_item}.")
+            continue
+            
+        info(f"Unlinked {src_item} from {dst_item}.")
         dst_item.unlink()
 
 
 def main(args: list[str]) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", help="Must be on of `deploy` or `undeploy`.")
+    parser.add_argument(
+        "command",
+        help="Must be on of `deploy` or `undeploy`.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        nargs="?",
+        const=True,
+        default=False,
+        help=(
+            "If enabled, this script will not make any changes "
+            "and instead print out the changes it would have made."
+        ),
+    )
     structured_args = parser.parse_args(args[1:])
     
     command: str = structured_args.command
     if command == "deploy":
-        deploy()
+        deploy(structured_args.dry_run)
     elif command == "undeploy":
-        undeploy()
+        undeploy(structured_args.dry_run)
     else:
         fatal(
             "Command must be one of `deploy` or `undeploy`,\n"
