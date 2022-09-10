@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+
+RED = ""
+YELLOW = ""
+RESET = ""
+
+
+MANIFEST = {
+    ".config/kitty": {
+        "current-theme.conf",
+        "kitty.conf",
+    },
+    ".": {
+        ".gitconfig",
+        ".tmux.conf",
+        ".zshrc",
+    },
+    "bin": {
+        "make-packing-checklist",
+        "manage-dotfiles",
+    },
+}
+
+
+def log(contents: str, color: str) -> None:
+    print(
+        f"{color}{contents}{RESET}",
+        file=sys.stderr,
+        flush=True,
+    )
+    
+    
+def error(contents: str) -> None:
+    log(contents, RED)
+    
+    
+def fatal(contents: str) -> None:
+    error(contents)
+    raise SystemExit()
+    
+    
+def warning(contents: str) -> None:
+    log(contents, YELLOW)
+    
+    
+def info(contents: str) -> None:
+    log(contents, "")
+
+
+def iter_manifest() -> tuple[Path, Path, Path]:
+    pwd = Path.cwd()
+    home = Path.home()
+    for target_dir, items in MANIFEST.items():
+        for item in items:
+            yield (pwd / item, home / target_dir / item)
+    
+    
+def deploy() -> None:
+    for src_item, dst_item in iter_manifest():
+        dst_item.parent.mkdir(exist_ok=True)
+        if not src_item.exists():
+            warning(f"Skipping {src_item.relative_to(Path.cwd())} -- doesn't exist.")
+            continue
+            
+        if dst_item.exists() and dst_item.is_symlink() and dst_item.readlink() == src_item:
+            continue
+        
+        if dst_item.exists():
+            warning(f"Skipping {src_item.relative_to(Path.cwd())} -- already exists.")
+            continue
+
+        info(f"Linked {src_item} to {dst_item}.")
+        dst_item.symlink_to(src_item)
+    
+    
+def undeploy() -> None:
+    for src_item, dst_item in iter_manifest():
+        if not dst_item:
+            # We don't need to log here,
+            # because this is idempotent.
+            continue
+            
+        if not dst_item.is_symlink():
+            warning(f"Skipping {dst_item} -- not a symlink.")
+            continue
+            
+        if dst_item.readlink() != src_item:
+            warning(f"Skipping {dst_item} -- doesn't refer to {src_item}.")
+            continue
+            
+        dst_item.unlink()
+
+
+def main(args: list[str]) -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", help="Must be on of `deploy` or `undeploy`.")
+    structured_args = parser.parse_args(args[1:])
+    
+    command: str = structured_args.command
+    if command == "deploy":
+        deploy()
+    elif command == "undeploy":
+        undeploy()
+    else:
+        fatal(
+            "Command must be one of `deploy` or `undeploy`,\n"
+            f"not `{command}`."
+        )
+
+
+if __name__ == "__main__":
+    main(sys.argv)
