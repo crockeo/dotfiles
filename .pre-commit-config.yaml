@@ -1,0 +1,9 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: HEAD
+    # TODO: figure out what hooks i want from this
+-   repo: https://github.com/pycqa/flake8
+    rev: HEAD
+    hooks:
+    -   id: flake8
+# TODO: add black and mypy as well
