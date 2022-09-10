@@ -54,11 +54,11 @@ def info(contents: str) -> None:
 
 
 def iter_manifest() -> tuple[Path, Path, Path]:
-    pwd = Path.cwd()
+    dotfiles_dir = Path(__file__).resolve().parent
     home = Path.home()
     for target_dir, items in MANIFEST.items():
         for item in items:
-            yield (pwd / item, home / target_dir / item)
+            yield (dotfiles_dir / item, home / target_dir / item)
     
     
 def deploy() -> None:
