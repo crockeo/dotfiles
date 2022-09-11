@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Iterable
 
 
 RED = ""
@@ -34,43 +35,47 @@ def log(contents: str, color: str) -> None:
         file=sys.stderr,
         flush=True,
     )
-    
-    
+
+
 def error(contents: str) -> None:
     log(contents, RED)
-    
-    
+
+
 def fatal(contents: str) -> None:
     error(contents)
     raise SystemExit()
-    
-    
+
+
 def warning(contents: str) -> None:
     log(contents, YELLOW)
-    
-    
+
+
 def info(contents: str) -> None:
     log(contents, "")
 
 
-def iter_manifest() -> tuple[Path, Path, Path]:
+def iter_manifest() -> Iterable[tuple[Path, Path]]:
     dotfiles_dir = Path(__file__).resolve().parent
     home = Path.home()
     for target_dir, items in MANIFEST.items():
         for item in items:
             yield (dotfiles_dir / item, home / target_dir / item)
-    
-    
+
+
 def deploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
         dst_item.parent.mkdir(exist_ok=True)
         if not src_item.exists():
             warning(f"Skipping {src_item.relative_to(Path.cwd())} -- doesn't exist.")
             continue
-            
-        if dst_item.exists() and dst_item.is_symlink() and dst_item.readlink() == src_item:
+
+        if (
+            dst_item.exists()
+            and dst_item.is_symlink()
+            and dst_item.readlink() == src_item
+        ):
             continue
-        
+
         if dst_item.exists():
             warning(f"Skipping {src_item.relative_to(Path.cwd())} -- already exists.")
             continue
@@ -81,27 +86,27 @@ def deploy(dry_run: bool) -> None:
 
         info(f"Linked {src_item} to {dst_item}.")
         dst_item.symlink_to(src_item)
-    
-    
+
+
 def undeploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
         if not dst_item:
             # We don't need to log here,
             # because this is idempotent.
             continue
-            
+
         if not dst_item.is_symlink():
             warning(f"Skipping {dst_item} -- not a symlink.")
             continue
-            
+
         if dst_item.readlink() != src_item:
             warning(f"Skipping {dst_item} -- doesn't refer to {src_item}.")
             continue
-            
+
         if dry_run:
             info(f"Would have unlinked {src_item} from {dst_item}.")
             continue
-            
+
         info(f"Unlinked {src_item} from {dst_item}.")
         dst_item.unlink()
 
@@ -123,17 +128,14 @@ def main(args: list[str]) -> None:
         ),
     )
     structured_args = parser.parse_args(args[1:])
-    
+
     command: str = structured_args.command
     if command == "deploy":
         deploy(structured_args.dry_run)
     elif command == "undeploy":
         undeploy(structured_args.dry_run)
     else:
-        fatal(
-            "Command must be one of `deploy` or `undeploy`,\n"
-            f"not `{command}`."
-        )
+        fatal("Command must be one of `deploy` or `undeploy`,\n" f"not `{command}`.")
 
 
 if __name__ == "__main__":
