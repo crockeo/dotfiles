@@ -32,5 +32,7 @@ export TERM=screen-256color
 export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
 
+export EDITOR=hx
+
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
