@@ -55,6 +55,7 @@ PACKING_MANIFEST = [
         [
             Item("Socks", 7),
             Item("Underwear", 7),
+            Item("Shirts", 7),
             Item("Jeans"),
             Item("Blue Shorts"),
             Item("Comfy Pants"),
