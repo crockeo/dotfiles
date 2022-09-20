@@ -69,6 +69,7 @@ PACKING_MANIFEST = [
     Section(
         "Toiletries",
         [
+            Item("Comb"),
             Item("Razor"),
             Item("Razor Blades"),
             Item("Shaving Cream"),
@@ -86,6 +87,7 @@ PACKING_MANIFEST = [
         [
             Item("Laptop"),
             Item("Laptop Charger"),
+            Item("Wall Wart"),
             Item("Plug Converter", note="Optional"),
             Item("Kindle"),
             Item("Airpods"),
