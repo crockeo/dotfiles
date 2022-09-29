@@ -1,0 +1,5 @@
+# this is meant to include configuration
+# which may be proprietary + owned by the company
+# that i currently work for.
+# so we don't want to share it publicly :)
+.company.zshrc

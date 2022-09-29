@@ -18,8 +18,10 @@ MANIFEST = {
         "kitty.conf",
     },
     ".": {
+        ".company.zshrc",
         ".gitconfig",
         ".tmux.conf",
+        ".zprofile",
         ".zshrc",
     },
     "bin": {
