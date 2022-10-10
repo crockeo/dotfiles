@@ -36,3 +36,7 @@ export EDITOR=hx
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
+
+if [ -f ~/.company.zshrc ]; then
+    source ~/.company.zshrc
+fi
