@@ -93,11 +93,11 @@ class Task:
             conn,
             textwrap.dedent(
                 """\
-                SELECT *
-                FROM TMTask
-                WHERE uuid = ?
-                ORDER BY "index" ASC
-            """
+                    SELECT *
+                    FROM TMTask
+                    WHERE uuid = ?
+                    ORDER BY "index" ASC
+                """
             ),
             (uuid,),
         )
@@ -112,11 +112,11 @@ class Task:
             conn,
             textwrap.dedent(
                 """\
-                SELECT *
-                FROM TMTask
-                WHERE project = ? OR actionGroup = ?
-                ORDER BY "index" ASC
-            """
+                    SELECT *
+                    FROM TMTask
+                    WHERE project = ? OR actionGroup = ?
+                    ORDER BY "index" ASC
+                """
             ),
             (self.uuid, self.uuid),
         )
