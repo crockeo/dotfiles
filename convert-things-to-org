@@ -26,7 +26,9 @@ def get_columns(cursor: sqlite3.Cursor) -> list[str]:
     return columns
 
 
-def load_tasks_raw(conn: sqlite3.Connection, sql: str, parameters: tuple[Any, ...]) -> list[Task]:
+def load_tasks_raw(
+    conn: sqlite3.Connection, sql: str, parameters: tuple[Any, ...]
+) -> list[Task]:
     cursor = conn.execute(sql, parameters)
     columns = get_columns(cursor)
     tasks = []
@@ -89,12 +91,14 @@ class Task:
     def load(conn: sqlite3.Connection, uuid: str) -> Task:
         tasks = load_tasks_raw(
             conn,
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 SELECT *
                 FROM TMTask
                 WHERE uuid = ?
                 ORDER BY "index" ASC
-            """),
+            """
+            ),
             (uuid,),
         )
         if len(tasks) != 1:
@@ -106,12 +110,14 @@ class Task:
     def load_subtasks(self, conn: sqlite3.Connection) -> list[Task]:
         tasks = load_tasks_raw(
             conn,
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 SELECT *
                 FROM TMTask
                 WHERE project = ? OR actionGroup = ?
                 ORDER BY "index" ASC
-            """),
+            """
+            ),
             (self.uuid, self.uuid),
         )
         for task in tasks:
@@ -120,17 +126,23 @@ class Task:
 
     def render_to_org(self, *, indent_level: int = 1) -> str:
         headline_indent = "*" * indent_level
-        self_contents = f"{headline_indent} {self.title}"
+        headline_prefix = f"{headline_indent} TODO"
+        if self.sub_tasks:
+            headline_prefix = f"{headline_prefix} [/]"
+
+        self_contents = f"{headline_prefix} {self.title}"
         if self.notes:
             self_contents = f"{self_contents}\n{self.notes}"
         sub_task_contents = [
             sub_task.render_to_org(indent_level=indent_level + 1)
             for sub_task in self.sub_tasks
         ]
-        return "\n".join([
-            self_contents,
-            *sub_task_contents,
-        ])
+        return "\n".join(
+            [
+                self_contents,
+                *sub_task_contents,
+            ]
+        )
 
 
 def main(args: list[str]) -> None:
@@ -141,7 +153,7 @@ def main(args: list[str]) -> None:
         raise SystemExit("Usage: convert-things-to-org <things URL>")
 
     things_uuid = args[1]
-    things_uuid = things_uuid[len("things:///show?id="):]
+    things_uuid = things_uuid[len("things:///show?id=") :]
 
     with sqlite3.connect(THINGS_DB_PATH) as conn:
         task = Task.load(conn, things_uuid)
