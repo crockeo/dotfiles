@@ -4,10 +4,12 @@ from __future__ import annotations
 import sqlite3
 import sys
 import textwrap
-from typing import Any
 from dataclasses import dataclass
 from dataclasses import field
+from enum import Enum
 from pathlib import Path
+from typing import Any
+
 
 THINGS_DB_PATH = (
     Path.home()
@@ -40,6 +42,12 @@ def load_tasks_raw(
     return tasks
 
 
+class Status(Enum):
+    Open = 0
+    Cancelled = 2
+    Done = 3
+
+
 @dataclass
 class Task:
     # TODO: convert some of these from unstructured to structured
@@ -52,7 +60,7 @@ class Task:
     notes: str
     dueDate: Any
     dueDateOffset: Any
-    status: Any
+    status: int
     stopDate: Any
     start: Any
     startDate: Any
@@ -124,9 +132,14 @@ class Task:
             task.sub_tasks = task.load_subtasks(conn)
         return tasks
 
+    def org_todo_state(self) -> str:
+        if self.status in {Status.Cancelled.value, Status.Done.value}:
+            return "DONE"
+        return "TODO"
+
     def render_to_org(self, *, indent_level: int = 1) -> str:
         headline_indent = "*" * indent_level
-        headline_prefix = f"{headline_indent} TODO"
+        headline_prefix = f"{headline_indent} {self.org_todo_state()}"
         if self.sub_tasks:
             headline_prefix = f"{headline_prefix} [/]"
 
