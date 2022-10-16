@@ -25,6 +25,7 @@ MANIFEST = {
         ".zshrc",
     },
     "bin": {
+        "convert-things-to-org",
         "make-packing-checklist",
         "manage-dotfiles",
     },
