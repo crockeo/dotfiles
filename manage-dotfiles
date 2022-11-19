@@ -67,7 +67,7 @@ def iter_manifest() -> Iterable[tuple[Path, Path]]:
 
 def deploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
-        dst_item.parent.mkdir(exist_ok=True)
+        dst_item.parent.mkdir(parents=True, exist_ok=True)
         if not src_item.exists():
             warning(f"Skipping {src_item.relative_to(Path.cwd())} -- doesn't exist.")
             continue
