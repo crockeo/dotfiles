@@ -13,6 +13,11 @@ HISTFILE=~/.zsh_histfile
 HISTSIZE=1000
 SAVEHIST=1000
 
+function pjcd() {
+    project=$(find-project "$1") || return
+    cd "$project"
+}
+
 # Loading better auto-completion.
 autoload -Uz compinit
 compinit
