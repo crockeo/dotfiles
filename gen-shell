@@ -10,12 +10,12 @@ cat << EndOfMessage
   outputs = {self, flake-utils, nixpkgs}:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = nixpkgs.legacyPackages.\${system};
       in
       rec {
         defaultPackage = pkgs.mkShell {
-	  packages = [
-	    # TODO: place inputs here
+          packages = with pkgs; [
+            # TODO: place inputs here
           ];
         };
       }
