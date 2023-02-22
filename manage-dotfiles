@@ -26,6 +26,7 @@ MANIFEST = {
     },
     "bin": {
         "convert-things-to-org",
+        "gen-shell",
         "make-packing-checklist",
         "manage-dotfiles",
     },
