@@ -47,3 +47,7 @@ bindkey -e
 if [ -f ~/.company.zshrc ]; then
     source ~/.company.zshrc
 fi
+
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
