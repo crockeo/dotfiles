@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-nix develop --command zsh
+nix develop --impure --command zsh
