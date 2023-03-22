@@ -24,6 +24,9 @@ compinit
 
 # Setting the terminal prompt.
 PS1="%~$ "
+if [ -n "$IN_NIX_SHELL" ]; then
+    PS1="[nix] ${PS1}"
+fi
 
 # Making the colors all colored!
 export CLICOLOR=1
