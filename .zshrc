@@ -2,6 +2,10 @@ if [[ -f "/opt/homebrew/bin/brew" && -z "$HOMEBREW_REPOSITORY" ]]; then
     eval $(/opt/homebrew/bin/brew shellenv)
 fi
 
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+fi
+
 # Starting tmux
 if [ "$EMACS" = "" ] && [ "$TMUX" = "" ]
 then
@@ -54,3 +58,11 @@ fi
 if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
+
+### lyft_localdevtools_shell_rc start
+### DO NOT REMOVE: automatically installed as part of Lyft local dev tool setup
+if [[ -f "/opt/homebrew/Library/Taps/lyft/homebrew-localdevtools/scripts/shell_rc.sh" ]]; then
+    source "/opt/homebrew/Library/Taps/lyft/homebrew-localdevtools/scripts/shell_rc.sh"
+fi
+### lyft_localdevtools_shell_rc end
+export PATH=/opt/homebrew/bin:$PATH
