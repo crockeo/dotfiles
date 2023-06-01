@@ -5,4 +5,5 @@ if [ -z "$HOMEBREW_REPOSITORY" ]; then
 fi
 brew install \
      fzf \
+     go \
      git-delta
