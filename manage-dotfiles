@@ -19,6 +19,7 @@ MANIFEST = {
     },
     ".": {
         ".company.zshrc",
+        ".fzf.zsh",
         ".gitconfig",
         ".tmux.conf",
         ".zprofile",

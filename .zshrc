@@ -1,5 +1,11 @@
+#!/usr/bin/env zsh
+# shellcheck disable=all
 if [[ -f "/opt/homebrew/bin/brew" && -z "$HOMEBREW_REPOSITORY" ]]; then
     eval $(/opt/homebrew/bin/brew shellenv)
+fi
+
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
 fi
 
 # Starting tmux
@@ -53,6 +59,11 @@ fi
 
 if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
+# https://github.com/crockeo/develocity
+if [ -x develocity ]; then
+    eval "$(develocity shell-hook)"
 fi
 
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)

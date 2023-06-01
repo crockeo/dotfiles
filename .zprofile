@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+# shellcheck disable=all
 if [[ -f "/opt/homebrew/bin/brew" && -z "$HOMEBREW_REPOSITORY" ]]; then
     eval $(/opt/homebrew/bin/brew shellenv)
 fi
