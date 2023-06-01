@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+# shellcheck disable=all
 # Setup fzf
 # ---------
 if [[ ! "$PATH" == */opt/homebrew/opt/fzf/bin* ]]; then

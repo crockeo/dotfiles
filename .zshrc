@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+# shellcheck disable=all
 if [[ -f "/opt/homebrew/bin/brew" && -z "$HOMEBREW_REPOSITORY" ]]; then
     eval $(/opt/homebrew/bin/brew shellenv)
 fi
@@ -66,3 +68,7 @@ if [[ -f "/opt/homebrew/Library/Taps/lyft/homebrew-localdevtools/scripts/shell_r
 fi
 ### lyft_localdevtools_shell_rc end
 export PATH=/opt/homebrew/bin:$PATH
+
+if [ -x develocity ]; then
+    eval "$(develocity shell-hook)"
+fi
