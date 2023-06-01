@@ -3,3 +3,6 @@
 # that i currently work for.
 # so we don't want to share it publicly :)
 .company.zshrc
+
+# compiled commands
+migrate-to-obsidian

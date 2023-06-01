@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 from typing import Iterable
@@ -10,6 +11,11 @@ from typing import Iterable
 RED = ""
 YELLOW = ""
 RESET = ""
+
+
+NEEDS_COMPILATION = {
+    "migrate-to-obsidian": ("go", "build", "./cmd/migrate-to-obsidian"),
+}
 
 
 MANIFEST = {
@@ -31,6 +37,7 @@ MANIFEST = {
         "gen-shell",
         "make-packing-checklist",
         "manage-dotfiles",
+        "migrate-to-obsidian",
         "my-pgrep",
     },
 }
@@ -71,6 +78,11 @@ def iter_manifest() -> Iterable[tuple[Path, Path]]:
 
 def deploy(dry_run: bool) -> None:
     for src_item, dst_item in iter_manifest():
+        item_name = src_item.name
+        if (compile_command := NEEDS_COMPILATION.get(item_name)) is not None:
+            info(f"Compiling {item_name} with: {' '.join(compile_command)}")
+            subprocess.check_call(compile_command)
+
         dst_item.parent.mkdir(parents=True, exist_ok=True)
         if not src_item.exists():
             warning(f"Skipping {src_item.relative_to(Path.cwd())} -- doesn't exist.")
