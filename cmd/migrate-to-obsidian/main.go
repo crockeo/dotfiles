@@ -114,6 +114,45 @@ func migrateOrg(ctx *cli.Context) error {
 	return nil
 }
 
+func getThingsDBPath() (string, error) {
+	// https://culturedcode.com/things/support/articles/2982272/
+	rootDir := os.Getenv("HOME")
+	if rootDir == "" {
+		return "", fmt.Errorf("HOME is not set")
+	}
+
+	rootDir = filepath.Join(rootDir, "Library", "Group Containers", "JLMPQHK86H.com.culturedcode.ThingsMac")
+	entries, err := os.ReadDir(rootDir)
+	if err != nil {
+		return "", err
+	}
+
+	var databaseDir string
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasPrefix(entry.Name(), "ThingsData-") {
+			databaseDir = filepath.Join(rootDir, entry.Name())
+			break
+		}
+	}
+
+	if databaseDir == "" {
+		return "", fmt.Errorf("Missing ThingsData-XXXXX directory")
+	}
+
+	return filepath.Join(databaseDir, "main.sqlite"), nil
+}
+
+func migrateThings(ctx *cli.Context) error {
+	thingsDBPath, err := getThingsDBPath()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(thingsDBPath)
+
+	return nil
+}
+
 func main() {
 	app := &cli.App{
 		Name:  "migrate-to-obsidian",
@@ -123,6 +162,11 @@ func main() {
 				Name:   "migrate-org",
 				Usage:  "Migrate org-mode files to obsidian",
 				Action: migrateOrg,
+			},
+			{
+				Name:   "migrate-things",
+				Usage:  "Migrate Things.app database to obsidian",
+				Action: migrateThings,
 			},
 		},
 	}
