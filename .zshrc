@@ -23,7 +23,10 @@ autoload -Uz compinit
 compinit
 
 # Setting the terminal prompt.
-PS1="%~$ "
+export PS1="%~$ "
+if [[ ! -z "${IN_NIX_SHELL:-}" ]]; then
+    export PS1="[nix] $PS1"
+fi
 
 # Making the colors all colored!
 export CLICOLOR=1
@@ -51,3 +54,7 @@ fi
 if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/Users/crockeo/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)

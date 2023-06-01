@@ -30,6 +30,7 @@ MANIFEST = {
         "gen-shell",
         "make-packing-checklist",
         "manage-dotfiles",
+        "my-pgrep",
     },
 }
 
