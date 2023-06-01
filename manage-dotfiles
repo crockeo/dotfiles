@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Iterable
 
 
-RED = ""
-YELLOW = ""
-RESET = ""
+RED = "\033[31m"
+YELLOW = "\033[33m"
+RESET = "\033[0m"
 
 
 NEEDS_COMPILATION = {
@@ -81,7 +81,10 @@ def deploy(dry_run: bool) -> None:
         item_name = src_item.name
         if (compile_command := NEEDS_COMPILATION.get(item_name)) is not None:
             info(f"Compiling {item_name} with: {' '.join(compile_command)}")
-            subprocess.check_call(compile_command)
+            try:
+                subprocess.check_call(compile_command)
+            except subprocess.CalledProcessError:
+                warning(f"Failed to compile {item_name}")
 
         dst_item.parent.mkdir(parents=True, exist_ok=True)
         if not src_item.exists():
