@@ -3,8 +3,10 @@ package things
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 )
@@ -183,6 +185,35 @@ func (t *Task) Hierarchy(areas map[string]*Area, tasks map[string]*Task) TaskHie
 	}
 }
 
+func (t *Task) ScheduledBlock() string {
+	_ = time.ANSIC
+	if t.StartDate == nil {
+		return ""
+	}
+
+	// This is some cursed nonsense...
+	//
+	// Things uses a date format that I haven't seen before.
+	// It is an integer where each addition of `128` is a day.
+	// We know that `132604160` is today based on cross-referencing
+	// Things startDate w/ its rendered scheduled dates.
+	//
+	// So we just:
+	// - Find the # of days between today and the target date.
+	// - Use Go's date library to do the day offset calculation correctly.
+	// - Hope that this is actually a linear function :)
+	dayRate := 128
+	today := 132604160
+	dayDiff := (*t.StartDate / dayRate) - (today / dayRate)
+	todayDate := time.Date(2023, 6, 2, 0, 0, 0, 0, time.UTC)
+	targetDate := todayDate.AddDate(0, 0, dayDiff)
+
+	return fmt.Sprintf(
+		"[scheduled:: %s]",
+		targetDate.Format("2006-01-02"),
+	)
+}
+
 func (t *Task) Render() ([]byte, error) {
 	contents := bytes.Buffer{}
 	if err := taskTemplate.Execute(&contents, t); err != nil {
@@ -192,7 +223,7 @@ func (t *Task) Render() ([]byte, error) {
 }
 
 var taskTemplate = template.Must(template.New("task").Parse(`
-- [ ] #task {{ .Title }}
+- [ ] #task {{ .Title }} {{ .ScheduledBlock }}
 
 {{ .Notes }}
 `))
