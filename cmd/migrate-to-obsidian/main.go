@@ -12,6 +12,8 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
+
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/things"
 )
 
 func match(re *regexp.Regexp, s string) (map[string]string, bool) {
@@ -141,7 +143,7 @@ func getThingsDBPath() (string, error) {
 		return "", fmt.Errorf("Missing ThingsData-XXXXX directory")
 	}
 
-	return filepath.Join(databaseDir, "main.sqlite"), nil
+	return filepath.Join(databaseDir, "Things Database.thingsdatabase", "main.sqlite"), nil
 }
 
 func migrateThings(ctx *cli.Context) error {
@@ -154,6 +156,23 @@ func migrateThings(ctx *cli.Context) error {
 	conn, err := sql.Open("sqlite3", thingsDBPath)
 	if err != nil {
 		return err
+	}
+
+	areas, err := things.GetAreas(conn)
+	if err != nil {
+		return err
+	}
+	for _, area := range areas {
+		fmt.Fprintln(os.Stderr, "Area:", area.Title)
+	}
+
+	tasks, err := things.GetTasks(conn)
+	if err != nil {
+		return err
+	}
+
+	for _, task := range tasks {
+		fmt.Fprintln(os.Stderr, "Task:", task.Title)
 	}
 
 	_ = conn
