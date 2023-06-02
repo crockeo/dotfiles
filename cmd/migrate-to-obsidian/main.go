@@ -173,19 +173,13 @@ func migrateThings(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	areasByID := map[string]*things.Area{}
-	for _, area := range areas {
-		areasByID[area.Uuid] = area
-	}
 
 	tasks, err := things.GetTasks(conn)
 	if err != nil {
 		return err
 	}
-	tasksByID := map[string]*things.Task{}
 	isGroup := map[string]struct{}{}
 	for _, task := range tasks {
-		tasksByID[task.Uuid] = task
 		if task.Project != nil {
 			isGroup[*task.Project] = struct{}{}
 		}
@@ -198,7 +192,7 @@ func migrateThings(ctx *cli.Context) error {
 		if !task.IsActive() {
 			continue
 		}
-		hierarchy := task.Hierarchy(areasByID, tasksByID)
+		hierarchy := task.Hierarchy(areas, tasks)
 
 		if _, ok := isGroup[task.Uuid]; ok {
 			continue

@@ -19,14 +19,14 @@ type Area struct {
 	Experimental []byte `sql:"experimental"`
 }
 
-func GetAreas(conn *sql.DB) ([]*Area, error) {
+func GetAreas(conn *sql.DB) (map[string]*Area, error) {
 	rows, err := conn.Query("SELECT * FROM TMArea")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	areas := []*Area{}
+	areas := map[string]*Area{}
 	for rows.Next() {
 		area := &Area{}
 		err := rows.Scan(
@@ -40,7 +40,7 @@ func GetAreas(conn *sql.DB) ([]*Area, error) {
 		if err != nil {
 			return nil, err
 		}
-		areas = append(areas, area)
+		areas[area.Uuid] = area
 	}
 	return areas, nil
 }
@@ -89,14 +89,14 @@ type Task struct {
 	RepeaterMigrationDate            *float32 `sql:"repeaterMigrationDate"`
 }
 
-func GetTasks(conn *sql.DB) ([]*Task, error) {
+func GetTasks(conn *sql.DB) (map[string]*Task, error) {
 	rows, err := conn.Query("SELECT * FROM TMTask")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	tasks := []*Task{}
+	tasks := map[string]*Task{}
 	for rows.Next() {
 		task := &Task{}
 		err := rows.Scan(
@@ -145,7 +145,7 @@ func GetTasks(conn *sql.DB) ([]*Task, error) {
 		if err != nil {
 			return nil, err
 		}
-		tasks = append(tasks, task)
+		tasks[task.Uuid] = task
 	}
 	return tasks, nil
 }
