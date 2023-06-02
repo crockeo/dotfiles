@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
 )
 
@@ -147,8 +149,14 @@ func migrateThings(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
 	fmt.Println(thingsDBPath)
+
+	conn, err := sql.Open("sqlite3", thingsDBPath)
+	if err != nil {
+		return err
+	}
+
+	_ = conn
 
 	return nil
 }
