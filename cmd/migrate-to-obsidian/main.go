@@ -202,7 +202,12 @@ func migrateThings(ctx *cli.Context) error {
 		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
 			return err
 		}
-		if err := os.WriteFile(targetPath, []byte(task.Notes), 0644); err != nil {
+
+		contents, err := task.Render()
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(targetPath, []byte(contents), 0644); err != nil {
 			return err
 		}
 	}

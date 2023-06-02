@@ -1,8 +1,10 @@
 package things
 
 import (
+	"bytes"
 	"database/sql"
 	"path/filepath"
+	"text/template"
 
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 )
@@ -180,6 +182,20 @@ func (t *Task) Hierarchy(areas map[string]*Area, tasks map[string]*Task) TaskHie
 		heading,
 	}
 }
+
+func (t *Task) Render() ([]byte, error) {
+	contents := bytes.Buffer{}
+	if err := taskTemplate.Execute(&contents, t); err != nil {
+		return nil, err
+	}
+	return contents.Bytes(), nil
+}
+
+var taskTemplate = template.Must(template.New("task").Parse(`
+- [ ] #task {{ .Title }}
+
+{{ .Notes }}
+`))
 
 type TaskHierarchy struct {
 	Area    *Area
