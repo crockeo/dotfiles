@@ -1,6 +1,11 @@
 package things
 
-import "database/sql"
+import (
+	"database/sql"
+	"path/filepath"
+
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
+)
 
 // Things database schema as of 2023-06-01,
 // this may have changed if you're reading this from
@@ -14,16 +19,16 @@ type Area struct {
 	Experimental []byte `sql:"experimental"`
 }
 
-func GetAreas(conn *sql.DB) ([]Area, error) {
+func GetAreas(conn *sql.DB) ([]*Area, error) {
 	rows, err := conn.Query("SELECT * FROM TMArea")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	areas := []Area{}
+	areas := []*Area{}
 	for rows.Next() {
-		area := Area{}
+		area := &Area{}
 		err := rows.Scan(
 			&area.Uuid,
 			&area.Title,
@@ -84,16 +89,16 @@ type Task struct {
 	RepeaterMigrationDate            *float32 `sql:"repeaterMigrationDate"`
 }
 
-func GetTasks(conn *sql.DB) ([]Task, error) {
+func GetTasks(conn *sql.DB) ([]*Task, error) {
 	rows, err := conn.Query("SELECT * FROM TMTask")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	tasks := []Task{}
+	tasks := []*Task{}
 	for rows.Next() {
-		task := Task{}
+		task := &Task{}
 		err := rows.Scan(
 			&task.Uuid,
 			&task.LeavesTombstone,
@@ -145,6 +150,57 @@ func GetTasks(conn *sql.DB) ([]Task, error) {
 	return tasks, nil
 }
 
+func (t *Task) IsActive() bool {
+	return t.StopDate == nil && t.Trashed == 0
+}
+
+func (t *Task) Hierarchy(areas map[string]*Area, tasks map[string]*Task) TaskHierarchy {
+	var heading *Task
+	var project *Task
+
+	lookup := t
+	if lookup.Heading != nil {
+		heading = tasks[*lookup.Heading]
+		lookup = heading
+	}
+
+	if lookup.Project != nil {
+		project = tasks[*lookup.Project]
+		lookup = project
+	}
+
+	var area *Area
+	if lookup.Area != nil {
+		area = areas[*lookup.Area]
+	}
+
+	return TaskHierarchy{
+		area,
+		project,
+		heading,
+	}
+}
+
+type TaskHierarchy struct {
+	Area    *Area
+	Project *Task
+	Heading *Task
+}
+
+func (t TaskHierarchy) Path() string {
+	path := ""
+	if t.Area != nil {
+		path = filepath.Join(path, util.EscapePath(t.Area.Title))
+	}
+	if t.Project != nil {
+		path = filepath.Join(path, util.EscapePath(t.Project.Title))
+	}
+	if t.Heading != nil {
+		path = filepath.Join(path, util.EscapePath(t.Heading.Title))
+	}
+	return path
+}
+
 type Tag struct {
 	Uuid         string  `sql:"uuid"`
 	Title        string  `sql:"title"`
@@ -184,7 +240,7 @@ func GetTags(conn *sql.DB) ([]Tag, error) {
 
 type AreaTag struct {
 	Area string `sql:"areas"`
-	Tags  string `sql:"tags"`
+	Tags string `sql:"tags"`
 }
 
 func GetAreaTags(conn *sql.DB) ([]AreaTag, error) {
@@ -211,7 +267,7 @@ func GetAreaTags(conn *sql.DB) ([]AreaTag, error) {
 
 type TaskTag struct {
 	Task string `sql:"tasks"`
-	Tags  string `sql:"tags"`
+	Tags string `sql:"tags"`
 }
 
 func GetTaskTags(conn *sql.DB) ([]TaskTag, error) {

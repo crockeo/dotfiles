@@ -14,6 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/things"
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 )
 
 func match(re *regexp.Regexp, s string) (map[string]string, bool) {
@@ -147,6 +148,16 @@ func getThingsDBPath() (string, error) {
 }
 
 func migrateThings(ctx *cli.Context) error {
+	destFolder := ctx.Args().Get(0)
+	if destFolder == "" {
+		return fmt.Errorf("dest folder is required")
+	}
+
+	destFolder, err := filepath.Abs(destFolder)
+	if err != nil {
+		return err
+	}
+
 	thingsDBPath, err := getThingsDBPath()
 	if err != nil {
 		return err
@@ -162,17 +173,44 @@ func migrateThings(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	areasByID := map[string]*things.Area{}
 	for _, area := range areas {
-		fmt.Fprintln(os.Stderr, "Area:", area.Title)
+		areasByID[area.Uuid] = area
 	}
 
 	tasks, err := things.GetTasks(conn)
 	if err != nil {
 		return err
 	}
+	tasksByID := map[string]*things.Task{}
+	isGroup := map[string]struct{}{}
+	for _, task := range tasks {
+		tasksByID[task.Uuid] = task
+		if task.Project != nil {
+			isGroup[*task.Project] = struct{}{}
+		}
+		if task.Heading != nil {
+			isGroup[*task.Heading] = struct{}{}
+		}
+	}
 
 	for _, task := range tasks {
-		fmt.Fprintln(os.Stderr, "Task:", task.Title)
+		if !task.IsActive() {
+			continue
+		}
+		hierarchy := task.Hierarchy(areasByID, tasksByID)
+
+		if _, ok := isGroup[task.Uuid]; ok {
+			continue
+		}
+
+		targetPath := filepath.Join(destFolder, hierarchy.Path(), util.EscapePath(task.Title)+".md")
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(targetPath, []byte(task.Notes), 0644); err != nil {
+			return err
+		}
 	}
 
 	_ = conn
