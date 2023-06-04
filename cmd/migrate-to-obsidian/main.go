@@ -13,6 +13,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
 
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/notion"
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/things"
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 )
@@ -230,6 +231,11 @@ func main() {
 				Name:   "migrate-things",
 				Usage:  "Migrate Things.app database to obsidian",
 				Action: migrateThings,
+			},
+			{
+				Name:   "migrate-notion",
+				Usage:  "Migrate Notion.so database to obsidian",
+				Action: notion.Main,
 			},
 		},
 	}
