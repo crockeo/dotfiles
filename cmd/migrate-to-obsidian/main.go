@@ -162,7 +162,6 @@ func migrateThings(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(thingsDBPath)
 
 	conn, err := sql.Open("sqlite3", thingsDBPath)
 	if err != nil {
