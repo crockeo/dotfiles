@@ -53,7 +53,7 @@ type Task struct {
 	Uuid                             string   `sql:"uuid"`
 	LeavesTombstone                  int      `sql:"leavesTombstone"`
 	CreationDate                     float32  `sql:"creationDate"`
-	UserModificationDate             float32  `sql:"userModificationDate"`
+	UserModificationDate             *float32  `sql:"userModificationDate"`
 	Type                             int      `sql:"type"`
 	Status                           int      `sql:"status"`
 	StopDate                         *float32 `sql:"stopDate"`

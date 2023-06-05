@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
 
 	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
