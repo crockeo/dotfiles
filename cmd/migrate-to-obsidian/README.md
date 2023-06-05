@@ -17,6 +17,7 @@ USAGE:
 COMMANDS:
    migrate-org     Migrate org-mode files to obsidian
    migrate-things  Migrate Things.app database to obsidian
+   migrate-notion  Migrate Notion.so database to obsidian
    help, h         Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
