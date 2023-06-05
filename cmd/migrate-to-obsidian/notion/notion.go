@@ -50,7 +50,10 @@ func Main(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		contents = processContents(contents)
+
+		if filepath.Ext(zipFile.Name) == ".md" {
+			contents = processContents(contents)
+		}
 
 		path := filepath.Join(destFolder, stripPathUUID(zipFile.Name))
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -142,6 +145,10 @@ func processContents(rawContents []byte) []byte {
 		skip = len(lines)
 	}
 	lines = lines[skip:]
+
+	// TODO: scan each line for links to local files
+	// and then correct those paths
+	// with stripPathUUID
 
 	return []byte(strings.Join(lines, "\n"))
 }
