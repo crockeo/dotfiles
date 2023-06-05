@@ -6,7 +6,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 	"github.com/urfave/cli/v2"
 )
 
@@ -42,7 +45,7 @@ func Main(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		path := filepath.Join(destFolder, zipFile.Name)
+		path := filepath.Join(destFolder, stripPathUUID(zipFile.Name))
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			return err
 		}
@@ -107,4 +110,17 @@ func handleZipFile(file *zip.File, tmpDir string, fn func(*zip.File) error) erro
 	}
 
 	return traverseZipFile(subZipFile, fn)
+}
+
+var UUID_RE = regexp.MustCompile(`(?P<filename>.+) [a-z0-9]{32}(?P<suffix>\..+)?`)
+
+func stripPathUUID(path string) string {
+	parts := strings.Split(path, "/")
+	for i, part := range parts {
+		groups, ok := util.Match(UUID_RE, part)
+		if ok {
+			parts[i] = fmt.Sprintf("%s%s", groups["filename"], groups["suffix"])
+		}
+	}
+	return filepath.Join(parts[1:]...)
 }

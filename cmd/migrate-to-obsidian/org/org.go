@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/crockeo/dotfiles/cmd/migrate-to-obsidian/util"
 )
 
 func Main(ctx *cli.Context) error {
@@ -54,7 +56,7 @@ func Main(ctx *cli.Context) error {
 
 		targetDir := filepath.Join(destFolder, filepath.Dir(relPath))
 		targetName := filepath.Base(relPath)
-		match, ok := match(ORG_ROAM_NODE_RE, targetName)
+		match, ok := util.Match(ORG_ROAM_NODE_RE, targetName)
 		if ok {
 			targetName = match["name"] + ".md"
 		}
@@ -72,21 +74,6 @@ func Main(ctx *cli.Context) error {
 	}
 
 	return nil
-}
-
-func match(re *regexp.Regexp, s string) (map[string]string, bool) {
-	match := re.FindStringSubmatch(s)
-	if match == nil {
-		return nil, false
-	}
-	result := make(map[string]string)
-	for i, name := range re.SubexpNames() {
-		if i == 0 {
-			continue
-		}
-		result[name] = match[i]
-	}
-	return result, true
 }
 
 func run(args ...string) error {
