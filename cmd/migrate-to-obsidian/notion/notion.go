@@ -45,6 +45,13 @@ func Main(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
+		defer reader.Close()
+		contents, err := io.ReadAll(reader)
+		if err != nil {
+			return err
+		}
+		contents = processContents(contents)
+
 		path := filepath.Join(destFolder, stripPathUUID(zipFile.Name))
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			return err
@@ -53,7 +60,8 @@ func Main(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		if _, err := io.Copy(file, reader); err != nil {
+		defer file.Close()
+		if _, err := file.Write(contents); err != nil {
 			return err
 		}
 		return nil
@@ -123,4 +131,17 @@ func stripPathUUID(path string) string {
 		}
 	}
 	return filepath.Join(parts[1:]...)
+}
+
+func processContents(rawContents []byte) []byte {
+	contents := string(rawContents)
+	lines := strings.Split(contents, "\n")
+
+	skip := 2
+	if len(lines) < skip {
+		skip = len(lines)
+	}
+	lines = lines[skip:]
+
+	return []byte(strings.Join(lines, "\n"))
 }
