@@ -2,7 +2,8 @@
 
 I wanted to try out [Obsidian](https://obsidian.md/),
 but I already have a large collection of notes in [org-mode](https://orgmode.org/)
-and tasks in [Things](https://culturedcode.com/things/).
+and tasks in [Things](https://culturedcode.com/things/),
+and some of both in [Notion](https://notion.so/).
 This CLI helps migrate from those places to Obsidian!
 
 ## Usage
