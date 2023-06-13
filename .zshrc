@@ -63,7 +63,7 @@ fi
 
 # https://github.com/crockeo/develocity
 if [ -x develocity ]; then
-    eval "$(develocity shell-hook)"
+    eval "$(develocity shell-hook zsh)"
 fi
 
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
