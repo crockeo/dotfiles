@@ -10,3 +10,12 @@ brew install \
      git-delta \
      helix \
      tmux
+
+mkdir -p ~/.config
+if [[ ! -d ~/.config/helix ]]; then
+     git clone git@github.com:crockeo/helix-config ~/.config/helix
+fi
+
+if [[ ! -d ~/.emacs.d ]]; then
+     git clone git@github.com:crockeo/.emacs.d ~/.emacs.d
+fi
