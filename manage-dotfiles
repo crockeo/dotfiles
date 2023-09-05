@@ -14,7 +14,8 @@ RESET = "\033[0m"
 
 
 NEEDS_COMPILATION = {
-    "migrate-to-obsidian": ("go", "build", "./cmd/migrate-to-obsidian"),
+    # TODO: do i want to actually compile this??
+    # "migrate-to-obsidian": ("go", "build", "./cmd/migrate-to-obsidian"),
 }
 
 

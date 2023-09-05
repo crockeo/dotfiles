@@ -7,4 +7,6 @@ brew install \
      amber \
      fzf \
      go \
-     git-delta
+     git-delta \
+     helix \
+     tmux
