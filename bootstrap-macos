@@ -5,6 +5,7 @@ if [ -z "$HOMEBREW_REPOSITORY" ]; then
 fi
 brew install \
      amber \
+     cmake \
      fzf \
      go \
      git-delta \
