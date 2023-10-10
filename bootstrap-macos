@@ -5,7 +5,6 @@ if [ -z "$HOMEBREW_REPOSITORY" ]; then
 fi
 brew install \
      ag \
-     amber \
      cmake \
      fzf \
      go \
@@ -21,3 +20,10 @@ fi
 if [[ ! -d ~/.emacs.d ]]; then
      git clone git@github.com:crockeo/.emacs.d ~/.emacs.d
 fi
+
+if [[ ! -x rustc ]]; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+fi
+
+# Code search / replace tool with ambs and ambr.
+cargo install amber
