@@ -26,4 +26,6 @@ if [[ ! -x rustc ]]; then
 fi
 
 # Code search / replace tool with ambs and ambr.
-cargo install amber
+cargo install \
+     amber \
+     zoxide

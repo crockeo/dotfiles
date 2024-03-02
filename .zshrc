@@ -8,6 +8,10 @@ if [ -f ~/.fzf.zsh ]; then
     source ~/.fzf.zsh
 fi
 
+if [[ -d "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
+fi
+
 # Starting tmux
 if [ "$EMACS" = "" ] && [ "$TMUX" = "" ]
 then
@@ -52,6 +56,10 @@ export EDITOR=hx
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
+
+# Set up zoxide
+eval "$(zoxide init zsh)"
+alias cd=z
 
 if [ -f ~/.company.zshrc ]; then
     source ~/.company.zshrc
