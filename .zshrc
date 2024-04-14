@@ -3,6 +3,7 @@
 if [[ -f "/opt/homebrew/bin/brew" && -z "$HOMEBREW_REPOSITORY" ]]; then
     eval $(/opt/homebrew/bin/brew shellenv)
 fi
+export HOMEBREW_NO_AUTO_UPDATE=true
 
 if [ -f ~/.fzf.zsh ]; then
     source ~/.fzf.zsh
@@ -69,7 +70,4 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# https://github.com/crockeo/develocity
-if [ -x develocity ]; then
-    eval "$(develocity shell-hook zsh)"
-fi
+alias venv="source ./venv/bin/activate"
