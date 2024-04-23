@@ -6,10 +6,12 @@ fi
 brew install \
      ag \
      cmake \
+     fd \
      fzf \
-     go \
      git-delta \
+     go \
      helix \
+     ripgrep \
      tmux
 
 mkdir -p ~/.config
