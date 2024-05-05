@@ -34,6 +34,7 @@ def find_repo_root(dir_path: Path) -> Path:
 def get_current_branch(repo_root: Path) -> str:
     output = subprocess.check_output(
         ("git", "rev-parse", "--symbolic-full-name", "HEAD"),
+        cwd=repo_root,
         text=True,
     )
     output = output.strip()
@@ -45,6 +46,18 @@ def get_current_branch(repo_root: Path) -> str:
             f"{RESET}"
         )
     return output[len("refs/heads/") :]
+
+
+def rebase(repo_root: Path, branch: str, onto: str, since: str | None = None) -> None:
+    args: tuple[str, ...]
+    if since is not None:
+        args = ("git", "rebase", "--onto", onto, since, branch)
+    else:
+        args = ("git", "rebase", onto, branch)
+    subprocess.check_call(
+        args,
+        cwd=repo_root,
+    )
 
 
 def get_db(repo_root: Path) -> sqlite3.Connection:
@@ -195,7 +208,13 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
-    print(get_branches_in_stack(ctx.db, ctx.branch))
+    for branch in get_branches_in_stack(ctx.db, ctx.branch):
+        if branch.parent is None:
+            # Can't restack something which doesn't have a parent!
+            continue
+
+        print(f"Restacking {branch.name} onto {branch.parent}...")
+        rebase(ctx.repo_root, branch.name, branch.parent)
 
 
 def main(args: list[str]) -> None:
