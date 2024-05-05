@@ -1,0 +1,375 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import sqlite3
+import subprocess
+import sys
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Generator, Sequence
+
+
+BLUE = "\033[94m"
+GREEN = "\033[92m"
+RED = "\033[91m"
+RESET = "\033[0m"
+
+
+def run(args: Sequence[str], *, cwd: Path | None) -> str:
+    try:
+        return subprocess.check_output(
+            args,
+            stderr=subprocess.PIPE,
+            cwd=cwd,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        rendered_args = " ".join(args)
+        raise SystemExit(
+            f"{RED}"
+            f"Subprocess failed to execute: {rendered_args}\n"
+            f"stdout: {e.stdout}\n\n"
+            f"stderr: {e.stderr}\n\n"
+            f"{RESET}"
+        )
+
+
+@contextmanager
+def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
+    current_branch = get_current_branch(repo_root)
+    try:
+        yield
+    finally:
+        run(("git", "checkout", current_branch), cwd=repo_root)
+
+
+def find_repo_root(dir_path: Path) -> Path:
+    original_dir_path = dir_path
+    while dir_path:
+        if dir_path == dir_path.parent:
+            break
+        if (dir_path / ".git").exists():
+            return dir_path
+        dir_path = dir_path.parent
+    raise SystemExit(
+        f"{RED}"
+        f"Failed to find repo root for: {original_dir_path}\n"
+        "Is it inside of a Git repository?"
+        f"{RESET}"
+    )
+
+
+def has_changes(repo_root: Path) -> bool:
+    proc = subprocess.run(
+        ("git", "status", "--porcelain=v1"),
+        cwd=repo_root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("A") or line.startswith("D") or line.startswith("M"):
+            return True
+    return False
+
+
+def get_current_branch(repo_root: Path) -> str:
+    output = subprocess.check_output(
+        ("git", "rev-parse", "--symbolic-full-name", "HEAD"),
+        cwd=repo_root,
+        text=True,
+    )
+    output = output.strip()
+    if not output.startswith("refs/heads/"):
+        raise SystemExit(
+            f"{RED}"
+            f"Failed to get current branch for: {repo_root}\n"
+            "Is there a branch checked out?"
+            f"{RESET}"
+        )
+    return output[len("refs/heads/") :]
+
+
+def rebase(repo_root: Path, branch: str, onto: str, since: str | None = None) -> None:
+    args: tuple[str, ...]
+    if since is not None:
+        args = ("git", "rebase", "--onto", onto, since, branch)
+    else:
+        args = ("git", "rebase", onto, branch)
+    run(args, cwd=repo_root)
+
+
+def get_db(repo_root: Path) -> sqlite3.Connection:
+    db = sqlite3.connect(repo_root / ".git" / "diamond.sqlite3")
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS branches (
+            name TEXT PRIMARY KEY,
+            parent TEXT
+        )
+        """
+    )
+    return db
+
+
+@dataclass(frozen=True)
+class Branch:
+    name: str
+    parent: str | None
+
+
+def get_root_branch(db: sqlite3.Connection) -> str | None:
+    root_branch: tuple[str] | None = db.execute(
+        "SELECT name FROM branches WHERE parent IS NULL"
+    ).fetchone()
+    if root_branch is None:
+        return None
+    return root_branch[0]
+
+
+def get_parent(db: sqlite3.Connection, branch: str) -> str | None:
+    parent: tuple[str | None] | None = db.execute(
+        "SELECT parent FROM branches WHERE name = ?",
+        (branch,),
+    ).fetchone()
+    if parent is None:
+        return None
+    return parent[0]
+
+
+def get_branches_in_stack(db: sqlite3.Connection, branch: str) -> list[Branch]:
+    cursor = db.execute(
+        """
+        WITH RECURSIVE
+          stack_branches(name, parent, level) AS (
+            VALUES(?, ?, 0)
+
+            UNION
+
+            SELECT branches.name, branches.parent, stack_branches.level + 1
+            FROM branches, stack_branches
+            WHERE branches.parent = stack_branches.name
+
+            UNION
+
+            SELECT branches.name, branches.parent, stack_branches.level - 1
+            FROM branches, stack_branches
+            WHERE stack_branches.parent = branches.name
+              AND branches.parent IS NOT NULL
+          )
+        SELECT DISTINCT name, parent
+        FROM stack_branches
+        WHERE name <> parent
+        ORDER BY level ASC
+        """,
+        (branch, branch),
+    )
+    branches = []
+    for name, parent in cursor.fetchall():
+        branches.append(
+            Branch(
+                name=name,
+                parent=parent,
+            )
+        )
+    return branches
+
+
+@dataclass
+class Context:
+    branch: str
+    db: sqlite3.Connection
+    repo_root: Path
+    remote: str | None
+
+
+def create(ctx: Context) -> None:
+    root_branch = get_root_branch(ctx.db)
+    current_branch = get_current_branch(ctx.repo_root)
+
+    print(current_branch, ctx.branch)
+
+    if ctx.branch != current_branch:
+        if root_branch is None:
+            raise SystemExit(
+                f"{RED}"
+                "Cannot create new branch until root is created.\n"
+                "Create root by running:\n"
+                "  dmd create  (with no branch)"
+                f"{RESET}"
+            )
+
+        run(("git", "checkout", "-b", ctx.branch), cwd=ctx.repo_root)
+        ctx.db.execute(
+            """
+            INSERT OR REPLACE INTO branches (
+                name,
+                parent
+            ) VALUES (
+                ?,
+                ?
+            )
+            """,
+            (ctx.branch, current_branch),
+        )
+        return
+
+    if ctx.branch == current_branch:
+        if root_branch is None:
+            ctx.db.execute(
+                """
+                INSERT OR REPLACE INTO branches (
+                    name,
+                    parent
+                ) VALUES (
+                    ?,
+                    NULL
+                )
+                """,
+                (ctx.branch,),
+            )
+            return
+
+        existing_branch = ctx.db.execute(
+            "SELECT parent FROM branches WHERE name = ?", (ctx.branch,)
+        ).fetchone()
+        if existing_branch is not None:
+            raise SystemExit(
+                f"{RED}"
+                f"Cannot create branch which already exists: {ctx.branch}"
+                f"{RESET}"
+            )
+
+        # TODO: what if this branch is already tracked?
+        ctx.db.execute(
+            """
+            INSERT OR REPLACE INTO branches (
+                name,
+                parent
+            ) VALUES (
+                ?,
+                ?
+            )
+            """,
+            (ctx.branch, root_branch),
+        )
+
+
+def collapse(ctx: Context) -> None:
+    if has_changes(ctx.repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot collapse a branch with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
+    parent = get_parent(ctx.db, ctx.branch)
+    if parent is None:
+        raise SystemExit(
+            f"{RED}"
+            f"Could not find parent for {ctx.branch}. Does it exist?\n"
+            "If this is the root: cannot collapse the root branch."
+            f"{RESET}"
+        )
+
+    print(f"Collapsing {ctx.branch} into {parent}...")
+
+    with current_repo_state(ctx.repo_root):
+        for branch in get_branches_in_stack(ctx.db, ctx.branch):
+            if branch.parent != ctx.branch:
+                continue
+            print(f"Restacking {branch} onto {parent}...")
+            ctx.db.execute(
+                """
+                UPDATE branches
+                SET parent = ?
+                WHERE parent = ?
+                """,
+                (parent, ctx.branch),
+            )
+            rebase(ctx.repo_root, branch.name, parent, since=ctx.branch)
+
+    ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
+    if get_current_branch(ctx.repo_root) == ctx.branch:
+        run(("git", "checkout", parent), cwd=ctx.repo_root)
+
+
+def restack(ctx: Context) -> None:
+    if has_changes(ctx.repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot restack on a branch with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
+    with current_repo_state(ctx.repo_root):
+        for branch in get_branches_in_stack(ctx.db, ctx.branch):
+            if branch.parent is None:
+                # Can't restack something which doesn't have a parent!
+                continue
+
+            print(f"Restacking {branch.name} onto {branch.parent}...")
+            rebase(ctx.repo_root, branch.name, branch.parent)
+
+
+def push(ctx: Context) -> None:
+    remote: str | None = ctx.remote
+    if remote is None:
+        remotes = run(("git", "remote"), cwd=ctx.repo_root).splitlines()
+        if len(remotes) == 1:
+            remote = remotes[0].strip()
+        else:
+            raise SystemExit(
+                f"{RED}"
+                "No remote provided, and multiple remotes defines.\n"
+                "Explicitly provide a remote with the `--remote=...` option."
+                f"{RESET}"
+            )
+
+    for branch in get_branches_in_stack(ctx.db, ctx.branch):
+        print(f"Pushing {branch.name}...")
+        refspec = f"refs/heads/{branch.name}:refs/heads/{branch.name}"
+        run(("git", "push", "--force-with-lease", remote, refspec), cwd=ctx.repo_root)
+
+
+def main(args: list[str]) -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", choices=("create", "collapse", "restack", "push"))
+    parser.add_argument("--branch", default=None)
+    parser.add_argument("--remote", default=None)
+    namespace = parser.parse_args(args[1:])
+
+    command: str = namespace.command
+    branch: str | None = namespace.branch
+    remote: str | None = namespace.remote
+
+    repo_root = find_repo_root(Path.cwd())
+    db = get_db(repo_root)
+    if branch is None:
+        branch = get_current_branch(repo_root)
+
+    ctx = Context(
+        branch=branch,
+        db=db,
+        repo_root=repo_root,
+        remote=remote,
+    )
+    with db:
+        if command == "create":
+            create(ctx)
+        elif command == "collapse":
+            collapse(ctx)
+        elif command == "restack":
+            restack(ctx)
+        elif command == "push":
+            push(ctx)
+        db.commit()
+
+
+if __name__ == "__main__":
+    main(sys.argv)
