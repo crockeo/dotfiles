@@ -17,11 +17,10 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 
-def run(args: Sequence[str], *, cwd: Path | None) -> None:
+def run(args: Sequence[str], *, cwd: Path | None) -> str:
     try:
-        subprocess.check_call(
+        return subprocess.check_output(
             args,
-            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=cwd,
             text=True,
@@ -184,6 +183,7 @@ class Context:
     branch: str
     db: sqlite3.Connection
     repo_root: Path
+    remote: str | None
 
 
 def create(ctx: Context) -> None:
@@ -298,13 +298,43 @@ def restack(ctx: Context) -> None:
             rebase(ctx.repo_root, branch.name, branch.parent)
 
 
+def push(ctx: Context) -> None:
+    remote: str | None = ctx.remote
+    if remote is None:
+        remotes = run(("git", "remote"), cwd=ctx.repo_root).splitlines()
+        if len(remotes) == 1:
+            remote = remotes[0].strip()
+        else:
+            raise SystemExit(
+                f"{RED}"
+                "No remote provided, and multiple remotes defines.\n"
+                "Explicitly provide a remote with the `--remote=...` option."
+                f"{RESET}"
+            )
+
+    for branch in get_branches_in_stack(ctx.db, ctx.branch):
+        refspec = f"refs/heads/{branch}:refs/heads/{branch}"
+        output = run(
+            ("git", "push", "--force-with-lease", remote, refspec), cwd=ctx.repo_root
+        )
+        for line in output.splitlines():
+            line = line.strip()
+            if not line.startswith("remote: "):
+                continue
+            line = line[len("remote: ") :]
+            print(line)
+
+
 def main(args: list[str]) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("create", "collapse", "restack"))
+    parser.add_argument("command", choices=("create", "collapse", "restack", "push"))
     parser.add_argument("--branch", default=None)
+    parser.add_argument("--remote", default=None)
     namespace = parser.parse_args(args[1:])
 
     command: str = namespace.command
+    branch: str | None = namespace.branch
+    remote: str | None = namespace.remote
 
     repo_root = find_repo_root(Path.cwd())
     if has_changes(repo_root):
@@ -316,7 +346,6 @@ def main(args: list[str]) -> None:
         )
 
     db = get_db(repo_root)
-    branch: str | None = namespace.branch
     if branch is None:
         branch = get_current_branch(repo_root)
 
@@ -324,6 +353,7 @@ def main(args: list[str]) -> None:
         branch=branch,
         db=db,
         repo_root=repo_root,
+        remote=remote,
     )
     with db:
         if command == "create":
@@ -332,6 +362,8 @@ def main(args: list[str]) -> None:
             collapse(ctx)
         elif command == "restack":
             restack(ctx)
+        elif command == "push":
+            push(ctx)
         db.commit()
 
 
