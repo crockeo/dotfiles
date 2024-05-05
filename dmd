@@ -60,6 +60,59 @@ def get_db(repo_root: Path) -> sqlite3.Connection:
     return db
 
 
+@dataclass(frozen=True)
+class Branch:
+    name: str
+    parent: str | None
+
+
+def get_root_branch(db: sqlite3.Connection) -> str | None:
+    root_branch: tuple[str] | None = db.execute(
+        "SELECT name FROM branches WHERE parent IS NULL"
+    ).fetchone()
+    if root_branch is None:
+        return None
+    return root_branch[0]
+
+
+def get_branches_in_stack(db: sqlite3.Connection, branch: str) -> list[Branch]:
+    cursor = db.execute(
+        """
+        WITH RECURSIVE
+          stack_branches(name, parent, level) AS (
+            VALUES(?, ?, 0)
+
+            UNION
+
+            SELECT branches.name, branches.parent, stack_branches.level + 1
+            FROM branches, stack_branches
+            WHERE branches.parent = stack_branches.name
+
+            UNION
+
+            SELECT branches.name, branches.parent, stack_branches.level - 1
+            FROM branches, stack_branches
+            WHERE stack_branches.parent = branches.name
+              AND branches.parent IS NOT NULL
+          )
+        SELECT DISTINCT name, parent
+        FROM stack_branches
+        WHERE name <> parent
+        ORDER BY level ASC
+        """,
+        (branch, branch),
+    )
+    branches = []
+    for name, parent in cursor.fetchall():
+        branches.append(
+            Branch(
+                name=name,
+                parent=parent,
+            )
+        )
+    return branches
+
+
 @dataclass
 class Context:
     branch: str
@@ -68,9 +121,7 @@ class Context:
 
 
 def create(ctx: Context) -> None:
-    root_branch = ctx.db.execute(
-        "SELECT parent FROM branches WHERE PARENT IS NULL"
-    ).fetchone()
+    root_branch = get_root_branch(ctx.db)
     current_branch = get_current_branch(ctx.repo_root)
 
     if ctx.branch != current_branch:
@@ -116,7 +167,7 @@ def create(ctx: Context) -> None:
 
         existing_branch = ctx.db.execute(
             "SELECT parent FROM branches WHERE name = ?", (ctx.branch,)
-        )
+        ).fetchone()
         if existing_branch is not None:
             raise SystemExit(
                 f"{RED}"
@@ -144,7 +195,7 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
-    pass
+    print(get_branches_in_stack(ctx.db, ctx.branch))
 
 
 def main(args: list[str]) -> None:
@@ -173,6 +224,7 @@ def main(args: list[str]) -> None:
             collapse(ctx)
         elif command == "restack":
             restack(ctx)
+        db.commit()
 
 
 if __name__ == "__main__":
