@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import sqlite3
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+
+BLUE = "\033[94m"
+GREEN = "\033[92m"
+RED = "\033[91m"
+RESET = "\033[0m"
+
+
+def find_repo_root(dir_path: Path) -> Path:
+    original_dir_path = dir_path
+    while dir_path:
+        if dir_path == dir_path.parent:
+            break
+        if (dir_path / ".git").exists():
+            return dir_path
+        dir_path = dir_path.parent
+    raise SystemExit(
+        f"{RED}"
+        f"Failed to find repo root for: {original_dir_path}\n"
+        "Is it inside of a Git repository?"
+        f"{RESET}"
+    )
+
+
+def get_current_branch(repo_root: Path) -> str:
+    output = subprocess.check_output(
+        ("git", "rev-parse", "--symbolic-full-name", "HEAD"),
+        text=True,
+    )
+    output = output.strip()
+    if not output.startswith("refs/heads/"):
+        raise SystemExit(
+            f"{RED}"
+            f"Failed to get current branch for: {repo_root}\n"
+            "Is there a branch checked out?"
+            f"{RESET}"
+        )
+    return output[len("refs/heads/") :]
+
+
+def get_db(repo_root: Path) -> sqlite3.Connection:
+    db = sqlite3.connect(repo_root / ".git" / "diamond.sqlite3")
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS branches (
+            name TEXT PRIMARY KEY,
+            parent TEXT
+        )
+        """
+    )
+    return db
+
+
+@dataclass
+class Context:
+    branch: str
+    db: sqlite3.Connection
+    repo_root: Path
+
+
+def create(ctx: Context) -> None:
+    root_branch = ctx.db.execute(
+        "SELECT parent FROM branches WHERE PARENT IS NULL"
+    ).fetchone()
+    current_branch = get_current_branch(ctx.repo_root)
+
+    if ctx.branch != current_branch:
+        if root_branch is None:
+            raise SystemExit(
+                f"{RED}"
+                "Cannot create new branch until root is created.\n"
+                "Create root by running:\n"
+                "  dmd create  (with no branch)"
+                f"{RESET}"
+            )
+
+        subprocess.check_call(("git", "checkout", "-b", ctx.branch))
+        ctx.db.execute(
+            """
+            INSERT OR REPLACE INTO branches (
+                name,
+                parent,
+            ) VALUES (
+                ?,
+                ?
+            )
+            """,
+            (current_branch, ctx.branch),
+        )
+        return
+
+    if ctx.branch == current_branch:
+        if root_branch is None:
+            ctx.db.execute(
+                """
+                INSERT OR REPLACE INTO branches (
+                    name,
+                    parent
+                ) VALUES (
+                    ?,
+                    NULL
+                )
+                """,
+                (ctx.branch,),
+            )
+            return
+
+        existing_branch = ctx.db.execute(
+            "SELECT parent FROM branches WHERE name = ?", (ctx.branch,)
+        )
+        if existing_branch is not None:
+            raise SystemExit(
+                f"{RED}"
+                f"Cannot create branch which already exists: {ctx.branch}"
+                f"{RESET}"
+            )
+
+        # TODO: what if this branch is already tracked?
+        ctx.db.execute(
+            """
+            INSERT OR REPLACE INTO branches (
+                name,
+                parent
+            ) VALUES (
+                ?,
+                ?
+            )
+            """,
+            (ctx.branch, root_branch),
+        )
+
+
+def collapse(ctx: Context) -> None:
+    pass
+
+
+def restack(ctx: Context) -> None:
+    pass
+
+
+def main(args: list[str]) -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", choices=("create", "collapse", "restack"))
+    parser.add_argument("--branch", default=None)
+    namespace = parser.parse_args(args[1:])
+
+    command: str = namespace.command
+
+    repo_root = find_repo_root(Path.cwd())
+    db = get_db(repo_root)
+    branch: str | None = namespace.branch
+    if branch is None:
+        branch = get_current_branch(repo_root)
+
+    ctx = Context(
+        branch=branch,
+        db=db,
+        repo_root=repo_root,
+    )
+    with db:
+        if command == "create":
+            create(ctx)
+        elif command == "collapse":
+            collapse(ctx)
+        elif command == "restack":
+            restack(ctx)
+
+
+if __name__ == "__main__":
+    main(sys.argv)
