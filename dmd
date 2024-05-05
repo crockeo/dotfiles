@@ -38,24 +38,12 @@ def run(args: Sequence[str], *, cwd: Path | None) -> None:
 
 
 @contextmanager
-def stash_changes(repo_root: Path) -> Generator[None, None, None]:
-    # TODO: how to stash + pop a named patch so that
-    # i know i'm always restoring from the right place?
-    run(("git", "stash"), cwd=repo_root)
+def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
+    current_branch = get_current_branch(repo_root)
     try:
         yield
     finally:
-        run(("git", "stash", "pop"), cwd=repo_root)
-
-
-@contextmanager
-def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
-    current_branch = get_current_branch(repo_root)
-    with stash_changes(repo_root):
-        try:
-            yield
-        finally:
-            run(("git", "checkout", current_branch), cwd=repo_root)
+        run(("git", "checkout", current_branch), cwd=repo_root)
 
 
 def find_repo_root(dir_path: Path) -> Path:
@@ -72,6 +60,21 @@ def find_repo_root(dir_path: Path) -> Path:
         "Is it inside of a Git repository?"
         f"{RESET}"
     )
+
+
+def has_changes(repo_root: Path) -> bool:
+    proc = subprocess.run(
+        ("git", "status", "--porcelain=v1"),
+        cwd=repo_root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("A") or line.startswith("D") or line.startswith("M"):
+            return True
+    return False
 
 
 def get_current_branch(repo_root: Path) -> str:
@@ -281,8 +284,7 @@ def collapse(ctx: Context) -> None:
             rebase(ctx.repo_root, branch.name, parent, since=ctx.branch)
 
     ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
-    with stash_changes(ctx.repo_root):
-        run(("git", "checkout", parent), cwd=ctx.repo_root)
+    run(("git", "checkout", parent), cwd=ctx.repo_root)
 
 
 def restack(ctx: Context) -> None:
@@ -305,6 +307,14 @@ def main(args: list[str]) -> None:
     command: str = namespace.command
 
     repo_root = find_repo_root(Path.cwd())
+    if has_changes(repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot run dmd on a repo with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
     db = get_db(repo_root)
     branch: str | None = namespace.branch
     if branch is None:
