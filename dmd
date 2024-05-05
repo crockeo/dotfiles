@@ -5,14 +5,49 @@ import argparse
 import sqlite3
 import subprocess
 import sys
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Generator, Sequence
 
 
 BLUE = "\033[94m"
 GREEN = "\033[92m"
 RED = "\033[91m"
 RESET = "\033[0m"
+
+
+def run(args: Sequence[str], *, cwd: Path | None = None) -> None:
+    try:
+        subprocess.check_call(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=cwd,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        rendered_args = " ".join(args)
+        raise SystemExit(
+            f"{RED}"
+            f"Subprocess failed to execute: {rendered_args}\n"
+            f"stdout: {e.stdout}\n\n"
+            f"stderr: {e.stderr}\n\n"
+            f"{RESET}"
+        )
+
+
+@contextmanager
+def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
+    current_branch = get_current_branch(repo_root)
+    # TODO: how to stash + pop a named patch so that
+    # i know i'm always restoring from the right place?
+    run(("git", "stash"), cwd=repo_root)
+    try:
+        yield
+    finally:
+        run(("git", "checkout", current_branch), cwd=repo_root)
+        run(("git", "stash", "pop"), cwd=repo_root)
 
 
 def find_repo_root(dir_path: Path) -> Path:
@@ -54,10 +89,7 @@ def rebase(repo_root: Path, branch: str, onto: str, since: str | None = None) ->
         args = ("git", "rebase", "--onto", onto, since, branch)
     else:
         args = ("git", "rebase", onto, branch)
-    subprocess.check_call(
-        args,
-        cwd=repo_root,
-    )
+    run(args, cwd=repo_root)
 
 
 def get_db(repo_root: Path) -> sqlite3.Connection:
@@ -147,7 +179,7 @@ def create(ctx: Context) -> None:
                 f"{RESET}"
             )
 
-        subprocess.check_call(("git", "checkout", "-b", ctx.branch))
+        run(("git", "checkout", "-b", ctx.branch))
         ctx.db.execute(
             """
             INSERT OR REPLACE INTO branches (
@@ -217,19 +249,14 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
-    # TODO: build some mechanism to make sure that we always
-    # come back to this branch / diff on top of the branch after restacking
+    with current_repo_state(ctx.repo_root):
+        for branch in get_branches_in_stack(ctx.db, ctx.branch):
+            if branch.parent is None:
+                # Can't restack something which doesn't have a parent!
+                continue
 
-    # TODO: stash the contents of the current branch while doing restacking
-    # and then reapply after the restacking is done
-
-    for branch in get_branches_in_stack(ctx.db, ctx.branch):
-        if branch.parent is None:
-            # Can't restack something which doesn't have a parent!
-            continue
-
-        print(f"Restacking {branch.name} onto {branch.parent}...")
-        rebase(ctx.repo_root, branch.name, branch.parent)
+            print(f"Restacking {branch.name} onto {branch.parent}...")
+            rebase(ctx.repo_root, branch.name, branch.parent)
 
 
 def main(args: list[str]) -> None:
