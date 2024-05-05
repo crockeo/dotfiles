@@ -292,7 +292,8 @@ def collapse(ctx: Context) -> None:
             rebase(ctx.repo_root, branch.name, parent, since=ctx.branch)
 
     ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
-    run(("git", "checkout", parent), cwd=ctx.repo_root)
+    if get_current_branch(ctx.repo_root) == ctx.branch:
+        run(("git", "checkout", parent), cwd=ctx.repo_root)
 
 
 def restack(ctx: Context) -> None:
