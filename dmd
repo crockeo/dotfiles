@@ -208,6 +208,12 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
+    # TODO: build some mechanism to make sure that we always
+    # come back to this branch / diff on top of the branch after restacking
+
+    # TODO: stash the contents of the current branch while doing restacking
+    # and then reapply after the restacking is done
+
     for branch in get_branches_in_stack(ctx.db, ctx.branch):
         if branch.parent is None:
             # Can't restack something which doesn't have a parent!
