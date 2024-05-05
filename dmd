@@ -17,7 +17,7 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 
-def run(args: Sequence[str], *, cwd: Path | None = None) -> None:
+def run(args: Sequence[str], *, cwd: Path | None) -> None:
     try:
         subprocess.check_call(
             args,
@@ -38,16 +38,24 @@ def run(args: Sequence[str], *, cwd: Path | None = None) -> None:
 
 
 @contextmanager
-def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
-    current_branch = get_current_branch(repo_root)
+def stash_changes(repo_root: Path) -> Generator[None, None, None]:
     # TODO: how to stash + pop a named patch so that
     # i know i'm always restoring from the right place?
     run(("git", "stash"), cwd=repo_root)
     try:
         yield
     finally:
-        run(("git", "checkout", current_branch), cwd=repo_root)
         run(("git", "stash", "pop"), cwd=repo_root)
+
+
+@contextmanager
+def current_repo_state(repo_root: Path) -> Generator[None, None, None]:
+    current_branch = get_current_branch(repo_root)
+    with stash_changes(repo_root):
+        try:
+            yield
+        finally:
+            run(("git", "checkout", current_branch), cwd=repo_root)
 
 
 def find_repo_root(dir_path: Path) -> Path:
@@ -120,6 +128,16 @@ def get_root_branch(db: sqlite3.Connection) -> str | None:
     return root_branch[0]
 
 
+def get_parent(db: sqlite3.Connection, branch: str) -> str | None:
+    parent: tuple[str | None] | None = db.execute(
+        "SELECT parent FROM branches WHERE name = ?",
+        (branch,),
+    ).fetchone()
+    if parent is None:
+        return None
+    return parent[0]
+
+
 def get_branches_in_stack(db: sqlite3.Connection, branch: str) -> list[Branch]:
     cursor = db.execute(
         """
@@ -179,7 +197,7 @@ def create(ctx: Context) -> None:
                 f"{RESET}"
             )
 
-        run(("git", "checkout", "-b", ctx.branch))
+        run(("git", "checkout", "-b", ctx.branch), cwd=ctx.repo_root)
         ctx.db.execute(
             """
             INSERT OR REPLACE INTO branches (
@@ -236,16 +254,35 @@ def create(ctx: Context) -> None:
 
 
 def collapse(ctx: Context) -> None:
-    # TODO: this should do something like
-    # - find the parent of the provided branch
-    #   - error if it's the root (aka: no parent)
-    # - for each branch directly above this one on the stack:
-    #   - set that branch's parent to ctx.branch's parent
-    #     - but explicitly use `since=...` to not take the parent branch's changes
-    #   - restack it
-    # - then delete the current branch
-    # - then do a restack like normal on the rest of the stack
-    pass
+    parent = get_parent(ctx.db, ctx.branch)
+    if parent is None:
+        raise SystemExit(
+            f"{RED}"
+            f"Could not find parent for {ctx.branch}. Does it exist?\n"
+            "If this is the root: cannot collapse the root branch."
+            f"{RESET}"
+        )
+
+    print(f"Collapsing {ctx.branch} into {parent}...")
+
+    with current_repo_state(ctx.repo_root):
+        for branch in get_branches_in_stack(ctx.db, ctx.branch):
+            if branch.parent != ctx.branch:
+                continue
+            print(f"Restacking {branch} onto {parent}...")
+            ctx.db.execute(
+                """
+                UPDATE branches
+                SET parent = ?
+                WHERE parent = ?
+                """,
+                (parent, ctx.branch),
+            )
+            rebase(ctx.repo_root, branch.name, parent, since=ctx.branch)
+
+    ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
+    with stash_changes(ctx.repo_root):
+        run(("git", "checkout", parent), cwd=ctx.repo_root)
 
 
 def restack(ctx: Context) -> None:
