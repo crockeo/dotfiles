@@ -204,6 +204,15 @@ def create(ctx: Context) -> None:
 
 
 def collapse(ctx: Context) -> None:
+    # TODO: this should do something like
+    # - find the parent of the provided branch
+    #   - error if it's the root (aka: no parent)
+    # - for each branch directly above this one on the stack:
+    #   - set that branch's parent to ctx.branch's parent
+    #     - but explicitly use `since=...` to not take the parent branch's changes
+    #   - restack it
+    # - then delete the current branch
+    # - then do a restack like normal on the rest of the stack
     pass
 
 
