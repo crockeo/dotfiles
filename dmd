@@ -257,6 +257,14 @@ def create(ctx: Context) -> None:
 
 
 def collapse(ctx: Context) -> None:
+    if has_changes(ctx.repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot collapse a branch with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
     parent = get_parent(ctx.db, ctx.branch)
     if parent is None:
         raise SystemExit(
@@ -288,6 +296,14 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
+    if has_changes(ctx.repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot restack on a branch with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
     with current_repo_state(ctx.repo_root):
         for branch in get_branches_in_stack(ctx.db, ctx.branch):
             if branch.parent is None:
@@ -313,16 +329,9 @@ def push(ctx: Context) -> None:
             )
 
     for branch in get_branches_in_stack(ctx.db, ctx.branch):
-        refspec = f"refs/heads/{branch}:refs/heads/{branch}"
-        output = run(
-            ("git", "push", "--force-with-lease", remote, refspec), cwd=ctx.repo_root
-        )
-        for line in output.splitlines():
-            line = line.strip()
-            if not line.startswith("remote: "):
-                continue
-            line = line[len("remote: ") :]
-            print(line)
+        print(f"Pushing {branch.name}...")
+        refspec = f"refs/heads/{branch.name}:refs/heads/{branch.name}"
+        run(("git", "push", "--force-with-lease", remote, refspec), cwd=ctx.repo_root)
 
 
 def main(args: list[str]) -> None:
@@ -337,14 +346,6 @@ def main(args: list[str]) -> None:
     remote: str | None = namespace.remote
 
     repo_root = find_repo_root(Path.cwd())
-    if has_changes(repo_root):
-        raise SystemExit(
-            f"{RED}"
-            "Cannot run dmd on a repo with uncommitted changes.\n"
-            "Please commit your changes and try again."
-            f"{RESET}"
-        )
-
     db = get_db(repo_root)
     if branch is None:
         branch = get_current_branch(repo_root)
