@@ -190,6 +190,8 @@ def create(ctx: Context) -> None:
     root_branch = get_root_branch(ctx.db)
     current_branch = get_current_branch(ctx.repo_root)
 
+    print(current_branch, ctx.branch)
+
     if ctx.branch != current_branch:
         if root_branch is None:
             raise SystemExit(
@@ -205,13 +207,13 @@ def create(ctx: Context) -> None:
             """
             INSERT OR REPLACE INTO branches (
                 name,
-                parent,
+                parent
             ) VALUES (
                 ?,
                 ?
             )
             """,
-            (current_branch, ctx.branch),
+            (ctx.branch, current_branch),
         )
         return
 
