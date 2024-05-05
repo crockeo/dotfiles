@@ -13,7 +13,7 @@ YELLOW = "\033[33m"
 RESET = "\033[0m"
 
 
-NEEDS_COMPILATION = {
+NEEDS_COMPILATION: dict[str, tuple[str, ...]] = {
     # TODO: do i want to actually compile this??
     # "migrate-to-obsidian": ("go", "build", "./cmd/migrate-to-obsidian"),
 }
@@ -35,6 +35,7 @@ MANIFEST = {
     "bin": {
         "convert-things-to-org",
         "dev-shell",
+        "dmd",
         "gen-shell",
         "make-packing-checklist",
         "manage-dotfiles",
