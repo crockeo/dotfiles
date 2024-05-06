@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sqlite3
 import subprocess
 import sys
@@ -18,6 +19,10 @@ RESET = "\033[0m"
 
 
 def run(args: Sequence[str], *, cwd: Path | None) -> str:
+    verbose_mode = os.environ.get("VERBOSE") is not None
+    if verbose_mode:
+        print(f"Running: {' '.join(args)}")
+
     try:
         return subprocess.check_output(
             args,
@@ -34,6 +39,22 @@ def run(args: Sequence[str], *, cwd: Path | None) -> str:
             f"stderr: {e.stderr}\n\n"
             f"{RESET}"
         )
+
+
+def get_remote(ctx: Context) -> str:
+    remote: str | None = ctx.remote
+    if remote is None:
+        remotes = run(("git", "remote"), cwd=ctx.repo_root).splitlines()
+        if len(remotes) == 1:
+            remote = remotes[0].strip()
+        else:
+            raise SystemExit(
+                f"{RED}"
+                "No remote provided, and multiple remotes defines.\n"
+                "Explicitly provide a remote with the `--remote=...` option."
+                f"{RESET}"
+            )
+    return remote
 
 
 @contextmanager
@@ -273,8 +294,14 @@ def collapse(ctx: Context) -> None:
             f"{RESET}"
         )
 
-    print(f"Collapsing {ctx.branch} into {parent}...")
+    root = get_root_branch(ctx.db)
+    if root is not None and parent == root:
+        print(f"Parent of {ctx.branch} is the root branch ensuring we have latest {root}...")
+        remote = get_remote(ctx)
+        run(("git", "fetch", remote, root), cwd=ctx.repo_root)
+        run(("git", "merge", "--ff-only", "--into-name", root, f"{remote}/{root}"), cwd=ctx.repo_root)
 
+    print(f"Collapsing {ctx.branch} into {parent}...")
     with current_repo_state(ctx.repo_root):
         for branch in get_branches_in_stack(ctx.db, ctx.branch):
             if branch.parent != ctx.branch:
@@ -315,19 +342,7 @@ def restack(ctx: Context) -> None:
 
 
 def push(ctx: Context) -> None:
-    remote: str | None = ctx.remote
-    if remote is None:
-        remotes = run(("git", "remote"), cwd=ctx.repo_root).splitlines()
-        if len(remotes) == 1:
-            remote = remotes[0].strip()
-        else:
-            raise SystemExit(
-                f"{RED}"
-                "No remote provided, and multiple remotes defines.\n"
-                "Explicitly provide a remote with the `--remote=...` option."
-                f"{RESET}"
-            )
-
+    remote = get_remote(ctx)
     for branch in get_branches_in_stack(ctx.db, ctx.branch):
         print(f"Pushing {branch.name}...")
         refspec = f"refs/heads/{branch.name}:refs/heads/{branch.name}"
