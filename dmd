@@ -335,8 +335,14 @@ def push(ctx: Context) -> None:
 
 
 def state(ctx: Context) -> None:
+    branch_indent = {}
     for branch in get_branches_in_stack(ctx.db, "master"):
-        print(f"{branch.name} -> {branch.parent}")
+        if branch.parent in branch_indent:
+            branch_indent[branch.name] = branch_indent[branch.parent] + 2
+        else:
+            branch_indent[branch.name] = 0
+        indent = " " * branch_indent[branch.name]
+        print(f"{indent}{branch.name} -> {branch.parent}")
 
 
 def main(args: list[str]) -> None:
