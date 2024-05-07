@@ -161,6 +161,20 @@ def get_root_branch(db: sqlite3.Connection) -> str | None:
     return root_branch[0]
 
 
+def get_current_branch(db: sqlite3.Connection, branch: str) -> Branch | None:
+    current_branch: tuple[str, str | None] | None = db.execute(
+        "SELECT name, parent FROM branches WHERE name = ?",
+        (branch,),
+    ).fetchone()
+    if current_branch is None:
+        return None
+    name, parent = current_branch
+    return Branch(
+        name,
+        parent,
+    )
+
+
 def get_parent(db: sqlite3.Connection, branch: str) -> str | None:
     parent: tuple[str | None] | None = db.execute(
         "SELECT parent FROM branches WHERE name = ?",
@@ -381,10 +395,12 @@ def drop(ctx: Context) -> None:
 
 
 def parent(ctx: Context) -> None:
-    parent = get_parent(ctx.db, ctx.branch)
-    if parent is None:
-        raise SystemExit("Already on the root branch.")
-    run(("git", "checkout", parent), cwd=ctx.repo_root)
+    branch = get_current_branch(ctx.db, ctx.branch)
+    if branch is None:
+        raise SystemExit(f"{RED}Current branch is not tracked: {ctx.branch}.{RESET}")
+    if branch.parent is None:
+        raise SystemExit("Already checked out the root branch.")
+    run(("git", "checkout", branch.parent), cwd=ctx.repo_root)
 
 
 def main(args: list[str]) -> None:
