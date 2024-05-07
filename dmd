@@ -97,6 +97,16 @@ def has_changes(repo_root: Path) -> bool:
     return False
 
 
+def ensure_no_changes(repo_root: Path) -> None:
+    if has_changes(repo_root):
+        raise SystemExit(
+            f"{RED}"
+            "Cannot run this command on a branch with uncommitted changes.\n"
+            "Please commit your changes and try again."
+            f"{RESET}"
+        )
+
+
 def get_current_branch(repo_root: Path) -> str:
     output = subprocess.check_output(
         ("git", "rev-parse", "--symbolic-full-name", "HEAD"),
@@ -277,14 +287,7 @@ def create(ctx: Context) -> None:
 
 
 def collapse(ctx: Context) -> None:
-    if has_changes(ctx.repo_root):
-        raise SystemExit(
-            f"{RED}"
-            "Cannot collapse a branch with uncommitted changes.\n"
-            "Please commit your changes and try again."
-            f"{RESET}"
-        )
-
+    ensure_no_changes(ctx.repo_root)
     parent = get_parent(ctx.db, ctx.branch)
     if parent is None:
         raise SystemExit(
@@ -294,19 +297,31 @@ def collapse(ctx: Context) -> None:
             f"{RESET}"
         )
 
+    other_branches_in_stack = [
+        branch
+        for branch in get_branches_in_stack(ctx.db, ctx.branch)
+        if branch.name != ctx.branch
+    ]
+    if not other_branches_in_stack:
+        print("Branch has no children, just deleting it.")
+        ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
+        return
+
     root = get_root_branch(ctx.db)
     if root is not None and parent == root:
         print(f"Parent of {ctx.branch} is the root branch ensuring we have latest {root}...")
         remote = get_remote(ctx)
-        run(("git", "fetch", remote, root), cwd=ctx.repo_root)
-        run(("git", "merge", "--ff-only", "--into-name", root, f"{remote}/{root}"), cwd=ctx.repo_root)
+        with current_repo_state(ctx.repo_root):
+            run(("git", "fetch", remote, root), cwd=ctx.repo_root)
+            run(("git", "checkout", root), cwd=ctx.repo_root)
+            run(("git", "merge", "--ff-only", f"{remote}/{root}"), cwd=ctx.repo_root)
 
     print(f"Collapsing {ctx.branch} into {parent}...")
     with current_repo_state(ctx.repo_root):
-        for branch in get_branches_in_stack(ctx.db, ctx.branch):
+        for branch in other_branches_in_stack:
             if branch.parent != ctx.branch:
                 continue
-            print(f"Restacking {branch} onto {parent}...")
+            print(f"Restacking {branch.name} onto {parent}...")
             ctx.db.execute(
                 """
                 UPDATE branches
@@ -323,14 +338,7 @@ def collapse(ctx: Context) -> None:
 
 
 def restack(ctx: Context) -> None:
-    if has_changes(ctx.repo_root):
-        raise SystemExit(
-            f"{RED}"
-            "Cannot restack on a branch with uncommitted changes.\n"
-            "Please commit your changes and try again."
-            f"{RESET}"
-        )
-
+    ensure_no_changes(ctx.repo_root)
     with current_repo_state(ctx.repo_root):
         for branch in get_branches_in_stack(ctx.db, ctx.branch):
             if branch.parent is None:
@@ -349,7 +357,7 @@ def push(ctx: Context) -> None:
         run(("git", "push", "--force-with-lease", remote, refspec), cwd=ctx.repo_root)
 
 
-def state(ctx: Context) -> None:
+def status(ctx: Context) -> None:
     branch_indent = {}
     for branch in get_branches_in_stack(ctx.db, "master"):
         if branch.parent in branch_indent:
@@ -360,9 +368,39 @@ def state(ctx: Context) -> None:
         print(f"{indent}{branch.name} -> {branch.parent}")
 
 
+def drop(ctx: Context) -> None:
+    parent = get_parent(ctx.db, ctx.branch)
+    if parent is None:
+        raise SystemExit(
+            f"{RED}"
+            f"Cannot drop the root branch `{ctx.branch}`."
+            f"{RESET}"
+        )
+    ctx.db.execute("UPDATE branches SET parent = ? WHERE parent = ?", (parent, ctx.branch))
+    ctx.db.execute("DELETE FROM branches WHERE name = ?", (ctx.branch,))
+
+
+def parent(ctx: Context) -> None:
+    parent = get_parent(ctx.db, ctx.branch)
+    if parent is None:
+        raise SystemExit("Already on the root branch.")
+    run(("git", "checkout", parent), cwd=ctx.repo_root)
+
+
 def main(args: list[str]) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("create", "collapse", "restack", "push", "state"))
+    parser.add_argument(
+        "command",
+        choices=(
+            "collapse",
+            "create",
+            "drop",
+            "parent",
+            "push",
+            "restack",
+            "status",
+        ),
+    )
     parser.add_argument("branch", default=None, nargs="?")
     parser.add_argument("--remote", default=None)
     namespace = parser.parse_args(args[1:])
@@ -389,10 +427,14 @@ def main(args: list[str]) -> None:
             collapse(ctx)
         elif command == "restack":
             restack(ctx)
+        elif command == "parent":
+            parent(ctx)
         elif command == "push":
             push(ctx)
-        elif command == "state":
-            state(ctx)
+        elif command == "status":
+            status(ctx)
+        elif command == "drop":
+            drop(ctx)
         db.commit()
 
 
