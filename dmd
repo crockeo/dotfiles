@@ -161,7 +161,7 @@ def get_root_branch(db: sqlite3.Connection) -> str | None:
     return root_branch[0]
 
 
-def get_current_branch(db: sqlite3.Connection, branch: str) -> Branch | None:
+def get_branch(db: sqlite3.Connection, branch: str) -> Branch | None:
     current_branch: tuple[str, str | None] | None = db.execute(
         "SELECT name, parent FROM branches WHERE name = ?",
         (branch,),
@@ -395,7 +395,7 @@ def drop(ctx: Context) -> None:
 
 
 def parent(ctx: Context) -> None:
-    branch = get_current_branch(ctx.db, ctx.branch)
+    branch = get_branch(ctx.db, ctx.branch)
     if branch is None:
         raise SystemExit(f"{RED}Current branch is not tracked: {ctx.branch}.{RESET}")
     if branch.parent is None:
