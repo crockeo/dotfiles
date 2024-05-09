@@ -20,6 +20,9 @@ NEEDS_COMPILATION: dict[str, tuple[str, ...]] = {
 
 
 MANIFEST = {
+    ".config": {
+        "zed",
+    },
     ".config/kitty": {
         "current-theme.conf",
         "kitty.conf",

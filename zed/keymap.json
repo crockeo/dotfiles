@@ -1,0 +1,15 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-a": "editor::MoveToBeginningOfLine",
+      "ctrl-e": "editor::MoveToEndOfLine"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-f": ["vim::SwitchMode", "Normal"]
+    }
+  }
+]
