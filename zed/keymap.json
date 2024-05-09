@@ -1,5 +1,11 @@
 [
   {
+    "contes": "vim_mode != insert",
+    "bindings": {
+      "space f": "file_finder::Toggle"
+    }
+  }
+  {
     "context": "Editor",
     "bindings": {
       "ctrl-a": "editor::MoveToBeginningOfLine",
@@ -7,9 +13,15 @@
     }
   },
   {
-    "context": "Editor",
+    "context": "Editor && vim_mode == insert",
     "bindings": {
       "ctrl-f": ["vim::SwitchMode", "Normal"]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "g r": "editor::FindAllReferences",
     }
   }
 ]
