@@ -1,5 +1,6 @@
 [core]
     pager = delta
+	excludesFile = ~/.config/gitignore
 
 [delta]
     navigate = true
