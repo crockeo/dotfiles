@@ -1,10 +1,11 @@
 [
   {
-    "contes": "vim_mode != insert",
+    "context": "Editor && vim_mode != insert",
     "bindings": {
-      "space f": "file_finder::Toggle"
+      "space f": "file_finder::Toggle",
+      "space k": "editor::Hover"
     }
-  }
+  },
   {
     "context": "Editor",
     "bindings": {
@@ -21,7 +22,7 @@
   {
     "context": "Editor && vim_mode == normal",
     "bindings": {
-      "g r": "editor::FindAllReferences",
+      "g r": "editor::FindAllReferences"
     }
   }
 ]
