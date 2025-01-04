@@ -13,7 +13,6 @@ fi
      fd \
      fzf \
      git-delta \
-     go \
      helix \
      ripgrep \
      tmux \
