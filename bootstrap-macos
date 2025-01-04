@@ -22,3 +22,18 @@ mkdir -p ~/.config
 if [[ ! -d ~/.config/helix ]]; then
      git clone git@github.com:crockeo/helix-config ~/.config/helix
 fi
+
+# Configuring some macOS things that I like:
+#
+# - Open + close the dock instantly.
+# - Make the keyboard repeat more quickly.
+# - Make the keyboard start repeating more quickly.
+echo >&2 "Configuring dock to appear instantly..."
+defaults write com.apple.dock autohide-time-modifier -int 0
+killall Dock
+echo >&2 "Done!"
+
+echo >&2 "Configuring keyboard repeat rate..."
+defaults write -g InitialKeyRepeat -int 15
+defaults write -g KeyRepeat -int 2
+echo >&2 "Done! You'll have to log out and back in for this to take effect."
