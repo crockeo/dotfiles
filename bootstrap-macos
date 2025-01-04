@@ -29,6 +29,7 @@ fi
 # - Make the keyboard repeat more quickly.
 # - Make the keyboard start repeating more quickly.
 echo >&2 "Configuring dock to appear instantly..."
+defaults write com.apple.dock autohide-delay -int 0
 defaults write com.apple.dock autohide-time-modifier -int 0
 killall Dock
 echo >&2 "Done!"
