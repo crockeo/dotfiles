@@ -14,7 +14,7 @@ if [[ -d "$HOME/.cargo/env" ]]; then
 fi
 
 # Starting tmux
-if [ "$EMACS" = "" ] && [ "$TMUX" = "" ]
+if [ "$EMACS" = "" ] && [ "$TERM_PROGRAM" != "tmux" ]
 then
     tmux new-session -A -s foobar
 fi
@@ -30,6 +30,9 @@ function pjcd() {
 }
 
 # Loading better auto-completion.
+if [[ -f "$HOME/.zsh-completion" ]]; then
+    fpath=(~/.zsh-completion $fpath)
+fi
 autoload -Uz compinit
 compinit
 
@@ -70,4 +73,10 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-alias venv="source ./venv/bin/activate"
+function venv() {
+    if [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate
+    elif [[ -f "venv/bin/activate" ]]; then
+        source venv/bin/activate
+    fi
+}
