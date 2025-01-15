@@ -2,8 +2,10 @@
   {
     "context": "Editor && vim_mode != insert",
     "bindings": {
+      "space b": "branches::OpenRecent",
       "space f": "file_finder::Toggle",
-      "space k": "editor::Hover"
+      "space k": "editor::Hover",
+      "space p": "projects::OpenRecent"
     }
   },
   {
