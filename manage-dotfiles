@@ -21,6 +21,7 @@ NEEDS_COMPILATION: dict[str, tuple[str, ...]] = {
 
 MANIFEST = {
     ".config": {
+        "ghostty",
         "zed",
     },
     ".config/kitty": {
