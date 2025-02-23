@@ -80,3 +80,12 @@ function venv() {
         source venv/bin/activate
     fi
 }
+
+if [[ -d "$HOME/.bun" ]]; then
+    # bun completions
+    [ -s "/Users/crockeo/.bun/_bun" ] && source "/Users/crockeo/.bun/_bun"
+
+    # bun
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+fi
