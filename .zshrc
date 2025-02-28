@@ -56,7 +56,7 @@ export TERM=screen-256color
 export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
 
-export EDITOR=hx
+export EDITOR=nvim
 
 # Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
 bindkey -e
@@ -89,3 +89,10 @@ if [[ -d "$HOME/.bun" ]]; then
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
 fi
+
+function cb() {
+	git branch -vv --sort=-committerdate --color \
+      | fzf --ansi --header Checkout \
+      | rg '^\s*(\S+)' -o -r '$1' \
+      | xargs git checkout
+}
