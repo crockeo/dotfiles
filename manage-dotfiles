@@ -24,6 +24,9 @@ MANIFEST = {
         "ghostty",
         "zed",
     },
+    ".claude": {
+        "CLAUDE.md",
+    },
     ".config/kitty": {
         "current-theme.conf",
         "kitty.conf",
@@ -163,7 +166,7 @@ def main(args: list[str]) -> None:
     elif command == "undeploy":
         undeploy(structured_args.dry_run)
     else:
-        fatal("Command must be one of `deploy` or `undeploy`,\n" f"not `{command}`.")
+        fatal(f"Command must be one of `deploy` or `undeploy`,\nnot `{command}`.")
 
 
 if __name__ == "__main__":
