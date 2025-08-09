@@ -30,9 +30,7 @@ function pjcd() {
 }
 
 # Loading better auto-completion.
-if [[ -f "$HOME/.zsh-completion" ]]; then
-    fpath=(~/.zsh-completion $fpath)
-fi
+fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 autoload -Uz compinit
 compinit
 
