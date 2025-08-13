@@ -1,5 +1,7 @@
 [core]
     pager = delta
+    untrackedcache = true
+    fsmonitor = true
 
 [delta]
     navigate = true
@@ -26,7 +28,7 @@
 
 [pull]
     merge = true
-	rebase = false
+    rebase = false
 
 [fetch]
-	prune = true
+    prune = true
