@@ -3,4 +3,4 @@ macos-option-as-alt = left
 keybind = shift+enter=text:\r
 keybind = alt+left=unbind
 keybind = alt+right=unbind
-theme = catppuccin-macchiato
+theme = catppuccin-macchiato.conf
