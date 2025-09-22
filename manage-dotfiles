@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-
 RED = "\033[31m"
 YELLOW = "\033[33m"
 RESET = "\033[0m"
@@ -40,6 +39,7 @@ MANIFEST = {
         ".zshrc",
     },
     "bin": {
+        "clean-branches",
         "convert-things-to-org",
         "dev-shell",
         "dmd",

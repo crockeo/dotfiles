@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+import subprocess
+
+
+def main() -> None:
+    branches = subprocess.check_output(
+        ("git", "--no-pager", "branch"), text=True
+    ).strip()
+    for branch in branches.splitlines():
+        branch = branch.strip()
+        if branch.startswith("*") or branch.startswith("+"):
+            continue
+        subprocess.check_call(("git", "branch", "--delete", "--force", branch))
+
+
+if __name__ == "__main__":
+    main()
