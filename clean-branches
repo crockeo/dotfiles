@@ -12,6 +12,9 @@ def main() -> None:
         if branch.startswith("*") or branch.startswith("+"):
             continue
         branches_to_remove.append(branch)
+    if not branches_to_remove:
+        print("No branches to remove.")
+        return
     subprocess.check_call(("git", "branch", "--delete", "--force", *branches_to_remove))
 
 
