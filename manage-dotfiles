@@ -38,6 +38,7 @@ MANIFEST = {
     },
     "bin": {
         "clean-branches",
+        "copy-git-permalink",
         "dmd",
         "manage-dotfiles",
         "migrate-to-obsidian",

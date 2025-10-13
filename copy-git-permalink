@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+import argparse
+import subprocess
+import re
+
+def get_revision() -> str:
+    return subprocess.check_output(("git", "rev-parse", "HEAD"), text=True, stderr=subprocess.DEVNULL).strip()
+
+
+SSH_URL_RE = re.compile(r"^git@(?P<url>[^:]+):(?P<repo_name>.+?)(\.git)?$")
+
+def get_remote_url() -> str:
+    url = subprocess.check_output(("git", "remote", "get-url", "origin"), text=True, stderr=subprocess.DEVNULL).strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+
+    match = SSH_URL_RE.match(url)
+    if match is None:
+        raise ValueError(f"Invalid SSH URL: {url}")
+
+    match_url = match["url"]
+    match_repo_name = match["repo_name"]
+    return f"https://{match_url}/{match_repo_name}"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("buffer_name")
+    parser.add_argument("selection_start")
+    parser.add_argument("selection_end")
+    namespace = parser.parse_args()
+
+    buffer_name: str = namespace.buffer_name
+    selection_end = int(namespace.selection_end)
+    selection_start = int(namespace.selection_start)
+    remote_url = get_remote_url()
+    revision = get_revision()
+
+    if selection_start == selection_end:
+        selection = f"L{selection_start}"
+    else:
+        selection = f"L{selection_start}-L{selection_end}"
+
+    permalink = f"{remote_url}/blob/{revision}/{buffer_name}#{selection}"
+    copy = subprocess.Popen(("pbcopy"), stdin=subprocess.PIPE, text=True)
+    _ = copy.communicate(permalink)
+
+
+if __name__ == "__main__":
+    main()
