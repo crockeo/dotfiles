@@ -22,7 +22,6 @@ MANIFEST = {
     ".config": {
         "ghostty",
         "gitui",
-        "zed",
     },
     ".claude": {
         "CLAUDE.md",
