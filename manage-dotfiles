@@ -21,6 +21,7 @@ NEEDS_COMPILATION: dict[str, tuple[str, ...]] = {
 MANIFEST = {
     ".config": {
         "ghostty",
+        "gitui",
         "zed",
     },
     ".claude": {
@@ -28,10 +29,8 @@ MANIFEST = {
     },
     ".config/kitty": {
         "current-theme.conf",
-        "kitty.conf",
     },
     ".": {
-        ".company.zshrc",
         ".fzf.zsh",
         ".gitconfig",
         ".tmux.conf",
@@ -40,11 +39,7 @@ MANIFEST = {
     },
     "bin": {
         "clean-branches",
-        "convert-things-to-org",
-        "dev-shell",
         "dmd",
-        "gen-shell",
-        "make-packing-checklist",
         "manage-dotfiles",
         "migrate-to-obsidian",
         "my-pgrep",
