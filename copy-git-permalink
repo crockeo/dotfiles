@@ -2,12 +2,36 @@
 import argparse
 import subprocess
 import re
+from pathlib import Path
+
 
 def get_revision() -> str:
     return subprocess.check_output(("git", "rev-parse", "HEAD"), text=True, stderr=subprocess.DEVNULL).strip()
 
 
+def lookup_hostname(hostname: str) -> str:
+    ssh_config = (Path.home() / ".ssh" / "config").read_text()
+    current_host: str | None = None
+    hostname_map: dict[str, str] = {}
+    for line in ssh_config.splitlines():
+        if line.startswith("Host"):
+            current_host = line.split(" ")[1].strip()
+        if not line.startswith(" "):
+            # We're at the end of a block,
+            # and so whatever `Host` we've found
+            # is now invalid.
+            current_host = None
+
+        if not current_host:
+            continue
+        line = line.strip()
+        if line.startswith("NostName"):
+            hostname_map[current_host] = line.split(" ")[1].strip()
+    return hostname_map[hostname]
+
+
 SSH_URL_RE = re.compile(r"^git@(?P<url>[^:]+):(?P<repo_name>.+?)(\.git)?$")
+
 
 def get_remote_url() -> str:
     url = subprocess.check_output(("git", "remote", "get-url", "origin"), text=True, stderr=subprocess.DEVNULL).strip()
@@ -18,7 +42,7 @@ def get_remote_url() -> str:
     if match is None:
         raise ValueError(f"Invalid SSH URL: {url}")
 
-    match_url = match["url"]
+    match_url = lookup_hostname(match["url"])
     match_repo_name = match["repo_name"]
     return f"https://{match_url}/{match_repo_name}"
 
