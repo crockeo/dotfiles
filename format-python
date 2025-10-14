@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+ruff check --fix --force-exclude --extend-select=I001 --exit-zero --no-cache --stdin-filename "$1" - |
+ruff format --force-exclude --stdin-filename "$1" -
