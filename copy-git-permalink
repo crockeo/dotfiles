@@ -6,7 +6,9 @@ from pathlib import Path
 
 
 def get_revision() -> str:
-    return subprocess.check_output(("git", "rev-parse", "HEAD"), text=True, stderr=subprocess.DEVNULL).strip()
+    return subprocess.check_output(
+        ("git", "rev-parse", "HEAD"), text=True, stderr=subprocess.DEVNULL
+    ).strip()
 
 
 def lookup_hostname(hostname: str) -> str:
@@ -16,7 +18,7 @@ def lookup_hostname(hostname: str) -> str:
     for line in ssh_config.splitlines():
         if line.startswith("Host"):
             current_host = line.split(" ")[1].strip()
-        if not line.startswith(" "):
+        elif not line.startswith(" "):
             # We're at the end of a block,
             # and so whatever `Host` we've found
             # is now invalid.
@@ -24,8 +26,9 @@ def lookup_hostname(hostname: str) -> str:
 
         if not current_host:
             continue
+
         line = line.strip()
-        if line.startswith("NostName"):
+        if line.startswith("HostName"):
             hostname_map[current_host] = line.split(" ")[1].strip()
     return hostname_map[hostname]
 
@@ -34,7 +37,9 @@ SSH_URL_RE = re.compile(r"^git@(?P<url>[^:]+):(?P<repo_name>.+?)(\.git)?$")
 
 
 def get_remote_url() -> str:
-    url = subprocess.check_output(("git", "remote", "get-url", "origin"), text=True, stderr=subprocess.DEVNULL).strip()
+    url = subprocess.check_output(
+        ("git", "remote", "get-url", "origin"), text=True, stderr=subprocess.DEVNULL
+    ).strip()
     if url.startswith("http://") or url.startswith("https://"):
         return url
 
