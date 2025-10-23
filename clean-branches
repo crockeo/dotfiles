@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import subprocess
+import sys
 
 
 def main() -> None:
+    filters = sys.argv[1:]
     branches = subprocess.check_output(
         ("git", "--no-pager", "branch"), text=True
     ).strip()
@@ -11,6 +13,12 @@ def main() -> None:
         branch = branch.strip()
         if branch.startswith("*") or branch.startswith("+"):
             continue
+        if filters:
+            for filter in filters:
+                if filter in branch:
+                    break
+            else:
+                continue
         branches_to_remove.append(branch)
     if not branches_to_remove:
         print("No branches to remove.")
