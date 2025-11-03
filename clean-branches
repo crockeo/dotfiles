@@ -11,7 +11,11 @@ def main() -> None:
     branches_to_remove = []
     for branch in branches.splitlines():
         branch = branch.strip()
-        if branch.startswith("*") or branch.startswith("+"):
+        if (
+            branch.startswith("*")
+            or branch.startswith("+")
+            or branch in {"main", "master"}
+        ):
             continue
         if filters:
             for filter in filters:
