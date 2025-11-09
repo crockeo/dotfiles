@@ -13,6 +13,9 @@ if [[ -d "$HOME/.cargo/env" ]]; then
     source "$HOME/.cargo/env"
 fi
 
+# Adding my only local bin.
+export PATH="$HOME/bin:$PATH"
+
 # Starting tmux
 if [ "$EMACS" = "" ] && [ "$TERM_PROGRAM" != "tmux" ]
 then
@@ -43,9 +46,6 @@ fi
 # Making the colors all colored!
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
-
-# Adding my only local bin.
-export PATH="$HOME/bin:$PATH"
 
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
