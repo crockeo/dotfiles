@@ -13,6 +13,12 @@ if [[ -d "$HOME/.cargo/env" ]]; then
     source "$HOME/.cargo/env"
 fi
 
+export EDITOR=nvim
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+bindkey -e
+bindkey "^[[3~" delete-char
+
 # Starting tmux
 if [ "$EMACS" = "" ] && [ "$TERM_PROGRAM" != "tmux" ]
 then
@@ -44,20 +50,12 @@ fi
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
-# Adding my only local bin.
-export PATH="$HOME/bin:$PATH"
-
 # Making the terminal run with 256 colors.
 export TERM=screen-256color
 
 # Configuring golang
 export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
-
-export EDITOR=hx
-
-# Setting terminal mode to Emacs mode, so I can use fun things like ^A, ^E
-bindkey -e
 
 # Set up zoxide
 eval "$(zoxide init zsh)"
