@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+sudo pacman -S \
+	fd \
+	fzf \
+	git \
+	git-delta \
+	less \
+	neovim \
+	ripgrep \
+	which \
+	zig \
+	zoxide

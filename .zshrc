@@ -20,7 +20,7 @@ bindkey -e
 bindkey "^[[3~" delete-char
 
 # Starting tmux
-if [ "$EMACS" = "" ] && [ "$TERM_PROGRAM" != "tmux" ]
+if [ -x "tmux" ] && [ "$EMACS" = "" ] && [ "$TERM_PROGRAM" != "tmux" ]
 then
     tmux new-session -A -s foobar
 fi

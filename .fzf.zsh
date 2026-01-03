@@ -12,4 +12,6 @@ fi
 
 # Key bindings
 # ------------
-source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+if [[ -d /opt/homebrew ]]; then
+  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+fi
