@@ -58,8 +58,10 @@ export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin"
 
 # Set up zoxide
-eval "$(zoxide init zsh)"
-alias cd=z
+if [[ "$-" == *i* ]]; then
+    eval "$(zoxide init zsh)"
+    alias cd=z
+fi
 
 if [ -f ~/.company.zshrc ]; then
     source ~/.company.zshrc
