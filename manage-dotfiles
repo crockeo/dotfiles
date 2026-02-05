@@ -23,13 +23,12 @@ MANIFEST = {
         "ghostty",
         "gitui",
     },
-    ".claude": {
-        "CLAUDE.md",
-    },
     ".config/kitty": {
         "current-theme.conf",
     },
     ".": {
+        ".claude/CLAUDE.md",
+        ".claude/settings.json",
         ".fzf.zsh",
         ".gitconfig",
         ".tmux.conf",
