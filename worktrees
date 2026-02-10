@@ -8,6 +8,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("directory")
     parser.add_argument("number")
+    parser.add_argument(
+        "--open-tmux",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="If set, open the new worktrees as windows in the current Tmux session.",
+    )
     namespace = parser.parse_args()
 
     cwd = Path.cwd()
@@ -25,16 +31,23 @@ def main() -> None:
     for i in range(number):
         output_path = directory / f"{cwd.name}-{i + 1}"
         print(f"Creating '{output_path}'...")
-        subprocess.run(
-            (
-                "git",
-                "worktree",
-                "add",
-                "--detach",
-                output_path,
-                default_ref,
+        if output_path.is_dir():
+            subprocess.run(
+                ("git", "checkout", "--detach", default_ref), cwd=output_path
             )
-        )
+        else:
+            subprocess.run(
+                (
+                    "git",
+                    "worktree",
+                    "add",
+                    "--detach",
+                    output_path,
+                    default_ref,
+                )
+            )
+        if namespace.open_tmux:
+            subprocess.run(("tmux", "new-window", "-c", str(output_path)))
 
 
 if __name__ == "__main__":
