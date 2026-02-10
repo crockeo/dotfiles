@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+import argparse
+import subprocess
+from pathlib import Path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("directory")
+    parser.add_argument("number")
+    namespace = parser.parse_args()
+
+    cwd = Path.cwd()
+    directory = Path(namespace.directory)
+
+    default_ref = (
+        subprocess.check_output(
+            ("git", "symbolic-ref", "refs/remotes/origin/HEAD"), text=True
+        )
+        .strip()
+        .removeprefix("refs/remotes/origin/")
+    )
+
+    number = int(namespace.number)
+    for i in range(number):
+        output_path = directory / f"{cwd.name}-{i + 1}"
+        print(f"Creating '{output_path}'...")
+        subprocess.run(
+            (
+                "git",
+                "worktree",
+                "add",
+                "--detach",
+                output_path,
+                default_ref,
+            )
+        )
+
+
+if __name__ == "__main__":
+    main()

@@ -43,6 +43,7 @@ MANIFEST = {
         "manage-dotfiles",
         "migrate-to-obsidian",
         "my-pgrep",
+        "worktrees",
     },
 }
 
