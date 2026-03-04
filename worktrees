@@ -1,53 +1,49 @@
 #!/usr/bin/env python3
 import argparse
+import shlex
 import subprocess
+import tempfile
 from pathlib import Path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("directory")
-    parser.add_argument("number")
-    parser.add_argument(
-        "--open-tmux",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="If set, open the new worktrees as windows in the current Tmux session.",
-    )
+    parser.add_argument("number", type=int)
     namespace = parser.parse_args()
 
     cwd = Path.cwd()
-    directory = Path(namespace.directory)
 
-    default_ref = (
-        subprocess.check_output(
-            ("git", "symbolic-ref", "refs/remotes/origin/HEAD"), text=True
-        )
-        .strip()
-        .removeprefix("refs/remotes/origin/")
-    )
+    for candidate in ("main", "master"):
+        if (
+            subprocess.run(
+                ("git", "rev-parse", "--verify", f"refs/heads/{candidate}"),
+                capture_output=True,
+            ).returncode
+            == 0
+        ):
+            default_ref = candidate
+            break
+    else:
+        default_ref = subprocess.check_output(
+            ("git", "rev-parse", "--abbrev-ref", "HEAD"), text=True
+        ).strip()
 
-    number = int(namespace.number)
-    for i in range(number):
-        output_path = directory / f"{cwd.name}-{i + 1}"
+    for i in range(namespace.number):
+        tmpdir = tempfile.mkdtemp(prefix=f"{cwd.name}-{i + 1}-")
+        output_path = Path(tmpdir)
         print(f"Creating '{output_path}'...")
-        if output_path.is_dir():
-            subprocess.run(
-                ("git", "checkout", "--detach", default_ref), cwd=output_path
-            )
-        else:
-            subprocess.run(
-                (
-                    "git",
-                    "worktree",
-                    "add",
-                    "--detach",
-                    output_path,
-                    default_ref,
-                )
-            )
-        if namespace.open_tmux:
-            subprocess.run(("tmux", "new-window", "-c", str(output_path)))
+        subprocess.run(
+            ("git", "worktree", "add", "--detach", str(output_path), default_ref),
+            check=True,
+        )
+        repo = shlex.quote(str(cwd))
+        wt = shlex.quote(str(output_path))
+        shell_cmd = (
+            f'trap "git -C {repo} worktree remove {wt} --force" EXIT; cd {wt}; $SHELL'
+        )
+        subprocess.run(
+            ("tmux", "new-window", "bash", "-c", shell_cmd),
+        )
 
 
 if __name__ == "__main__":
