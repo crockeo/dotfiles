@@ -2,6 +2,7 @@ clipboard-paste-protection = false
 font-size=12
 keybind = alt+left=unbind
 keybind = alt+right=unbind
+keybind = global:cmd+backquote=toggle_quick_terminal
 macos-option-as-alt = left
 shell-integration = zsh
 theme = catppuccin-macchiato.conf
