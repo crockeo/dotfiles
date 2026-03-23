@@ -10,11 +10,12 @@ fi
 /opt/homebrew/bin/brew install \
      ag \
      cmake \
+     difftastic \
      fd \
      fzf \
-     git-delta \
      gitui \
      helix \
+     mergiraf \
      neovim \
      raycast \
      ripgrep \

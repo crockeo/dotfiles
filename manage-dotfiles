@@ -30,6 +30,7 @@ MANIFEST = {
         ".claude/CLAUDE.md",
         ".claude/settings.json",
         ".fzf.zsh",
+        ".gitattributes",
         ".gitconfig",
         ".tmux.conf",
         ".zprofile",

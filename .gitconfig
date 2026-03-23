@@ -1,20 +1,17 @@
 [core]
-    pager = delta
     untrackedcache = true
     fsmonitor = true
-
-[delta]
-    navigate = true
-    light = false
+    attributesfile = ~/.gitattributes
 
 [diff]
-    colorMoved = default
-
-[interactive]
-    diffFilter = delta --color-only
+    external = difft
 
 [merge]
-    conflitstyle = diff3
+    conflictstyle = diff3
+
+[merge "mergiraf"]
+    name = mergiraf
+    driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
 
 [user]
     name = Cerek Hillen
